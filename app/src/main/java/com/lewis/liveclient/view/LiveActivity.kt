@@ -8,10 +8,25 @@ import com.lewis.liveclient.R
 import kotlinx.android.synthetic.main.activity_live.*
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * Create by lewis 17-11-26
  */
-class LiveActivity : AppCompatActivity() {
+class LiveActivity : BaseActivity() {
+
+    override fun init() {
+        setContentView(R.layout.activity_live)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        mVisible = true
+
+        // Set up the user interaction to manually show or hide the system UI.
+        fullscreen_content.setOnClickListener { toggle() }
+
+        // Upon interacting with UI controls, delay any scheduled hide()
+        // operations to prevent the jarring behavior of controls going away
+        // while interacting with the UI.
+        dummy_button.setOnTouchListener(mDelayHideTouchListener)
+    }
+
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -44,23 +59,6 @@ class LiveActivity : AppCompatActivity() {
             delayedHide(AUTO_HIDE_DELAY_MILLIS)
         }
         false
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_live)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        mVisible = true
-
-        // Set up the user interaction to manually show or hide the system UI.
-        fullscreen_content.setOnClickListener { toggle() }
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        dummy_button.setOnTouchListener(mDelayHideTouchListener)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
