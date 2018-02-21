@@ -19,7 +19,7 @@
         android:textSize="50sp"
         android:textStyle="bold" />-->
 
-    <android.opengl.GLSurfaceView
+    <com.lewis.liveclient.opengl.CameraView
       android:id="@+id/cameraView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
