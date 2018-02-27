@@ -5,6 +5,8 @@ import android.os.Handler
 import android.view.MenuItem
 import android.view.View
 import com.lewis.liveclient.R
+import com.lewis.liveclient.util.camera
+import com.lewis.liveclient.util.deleteOpenGLES
 import kotlinx.android.synthetic.main.activity_live.*
 
 /**
@@ -26,6 +28,12 @@ class LiveActivity : BaseActivity() {
     // operations to prevent the jarring behavior of controls going away
     // while interacting with the UI.
     dummy_button.setOnTouchListener(mDelayHideTouchListener)
+  }
+
+  override fun onDestroy() {
+    deleteOpenGLES()
+    camera.stopPreview()
+    super.onDestroy()
   }
 
   override fun onOptionsItemSelected(item: MenuItem?): Boolean {

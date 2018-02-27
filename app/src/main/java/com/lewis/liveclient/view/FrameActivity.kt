@@ -1,7 +1,6 @@
 package com.lewis.liveclient.view
 
 import android.content.Intent
-import android.os.Bundle
 import com.lewis.liveclient.R
 import kotlinx.android.synthetic.main.activity_main.*
 
