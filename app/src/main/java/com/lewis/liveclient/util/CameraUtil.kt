@@ -3,7 +3,6 @@ package com.lewis.liveclient.util
 import android.content.Context
 import android.hardware.Camera
 import android.widget.Toast
-import com.tencent.ttpic.recorder.VideoParam
 
 /**
  * Created by lewis on 18-2-24.
