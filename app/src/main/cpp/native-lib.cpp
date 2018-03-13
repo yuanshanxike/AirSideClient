@@ -12,7 +12,17 @@ Java_com_lewis_liveclient_MainActivity_stringFromJNI(
     jobject /* this */) {
   std::string hello = "Hello from C++";
 
-
-
   return env->NewStringUTF(hello.c_str());
+}
+
+extern "C"
+JNIEXPORT void
+
+JNICALL
+Java_com_lewis_liveclient_RTMPTest_publish_using_pack() {
+  RTMP *rtmp = NULL;
+  RTMPPacket *packet = NULL;
+
+  rtmp = RTMP_Alloc();
+  RTMP_Init(rtmp);
 }
