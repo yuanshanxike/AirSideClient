@@ -36,7 +36,7 @@ class FrameActivity : BaseActivity() {
       val rs = RenderScript.create(this)
       val options = BitmapFactory.Options()
       options.inScaled = false //禁止缩放（从res文件下的图片文件夹获取图片资源会对图片进行不同程度的缩放）
-      val bitmap = BitmapFactory.decodeResource(resources, R.drawable.lovepaper, options)
+      val bitmap = BitmapFactory.decodeResource(resources, R.drawable.lei, options)
       val rgbaAllocation = Allocation.createFromBitmap(rs, bitmap)
       val script = ScriptC_transform(rs)
       script._gNV21_frame = Allocation.createSized(rs, Element.U8(rs)
