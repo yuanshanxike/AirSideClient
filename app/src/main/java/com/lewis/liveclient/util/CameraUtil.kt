@@ -1,6 +1,7 @@
 package com.lewis.liveclient.util
 
 import android.content.Context
+import android.graphics.ImageFormat.NV21
 import android.hardware.Camera
 import android.widget.Toast
 
@@ -28,10 +29,11 @@ fun initCamera(context: Context, isFacing: Boolean = true): Camera {
   val cp: Camera.Parameters = camera.parameters
   val videoParam = VideoParam()
   videoParam.init(cp)
-  val sizes = cp.supportedPictureSizes  //cp.supportedPreviewSizes
-  val size = getOptimalPreviewSizeFullScreen(sizes)
-
-  cp.setPreviewSize(size.width, size.height)
+//  val sizes = cp.supportedPictureSizes  //cp.supportedPreviewSizes
+//  val size = getOptimalPreviewSizeFullScreen(sizes)
+//
+//  cp.setPreviewSize(size.width, size.height)
+  cp.previewFormat = NV21    //设置成nv21是为了配合x264进行编码
   cp.setPreviewFpsRange(videoParam.mFpsRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
       videoParam.mFpsRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX])
   camera.parameters = cp

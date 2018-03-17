@@ -36,16 +36,16 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     renderMode = RENDERMODE_WHEN_DIRTY
 
     //camera
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      val cameraManager: CameraManager =
-          context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-      for (i in 0..cameraManager.cameraIdList.size) {
-        Log.i("cameraDevice: $i", cameraManager.cameraIdList[i])
-      }
-
-    } else {
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//      val cameraManager: CameraManager =
+//          context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//      for (i in 0..cameraManager.cameraIdList.size) {
+//        Log.i("cameraDevice: $i", cameraManager.cameraIdList[i])
+//      }
+//
+//    } else {
       _camera = initCamera(context)
-    }
+//    }
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {

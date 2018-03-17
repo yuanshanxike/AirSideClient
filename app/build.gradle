@@ -19,8 +19,12 @@ android {
             }
         }
         ndk {
-            abiFilters "armeabi"
+            abiFilters "armeabi", "armeabi-v7a"
         }
+
+        //RenderScript settings
+        renderscriptTargetApi 15
+        renderscriptSupportModeEnabled true  //指定生成的字节码如果运行的设备不支持目标版本，则应该回退到兼容版本。
     }
     buildTypes {
         release {
@@ -38,6 +42,8 @@ android {
             assets.srcDirs = ['src/main/assets', 'src/main/assets/']
             //引入so文件
             jniLibs.srcDirs = ['libs/arm']
+            //引入RenderScript文件
+            renderscript.srcDirs = ['src/main/rs', 'src/main/rs/']
         }
     }
 }
