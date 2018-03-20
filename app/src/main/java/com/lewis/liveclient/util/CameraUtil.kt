@@ -4,9 +4,6 @@ import android.content.Context
 import android.graphics.ImageFormat.NV21
 import android.hardware.Camera
 import android.widget.Toast
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Created by lewis on 18-2-24.

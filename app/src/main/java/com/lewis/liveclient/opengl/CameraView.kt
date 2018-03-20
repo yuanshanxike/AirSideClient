@@ -132,6 +132,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
         this@CameraView.requestRender()
       }
 
+      //初始化RenderScript的必要上下文参数
       initRenderScript()
 
       //将此SurfaceTexture作为相机预览输出
