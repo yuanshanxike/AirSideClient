@@ -3,13 +3,13 @@ package com.lewis.liveclient.opengl
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
-import android.hardware.camera2.CameraManager
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
-import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import com.lewis.liveclient.util.*
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -92,6 +92,23 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 
       startPipeline(dataBuffer, transformMatrix)
       isOnSurfaceCreated = false
+
+      val buffer = ByteBuffer.allocate(720*1280*4).position(0)
+      GLES20.glReadPixels(0, 0, 720, 1280, GLES20.GL_RGBA   //耗时操作
+          , GLES20.GL_UNSIGNED_BYTE, buffer)
+      //rgba
+//      val path = "/sdcard/img-rs.nv21"
+//      val file = File(path)
+//      if (!file.exists())
+//        file.createNewFile()
+//      val fos = FileOutputStream(file)
+//      val bos = BufferedOutputStream(fos)
+//      bos.write((buffer as ByteBuffer).array())
+//      bos.flush()
+//      fos.close()
+      //nv21
+//      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
+      val bytes = getNV21FrameBufferByRenderScript((buffer as ByteBuffer).array(), 720, 1280)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -114,6 +131,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
         //context位于main线程
         this@CameraView.requestRender()
       }
+
+      initRenderScript()
 
       //将此SurfaceTexture作为相机预览输出
       camera.setPreviewTexture(surfaceTexture)

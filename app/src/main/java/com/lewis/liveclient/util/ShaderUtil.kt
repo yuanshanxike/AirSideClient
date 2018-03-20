@@ -71,6 +71,14 @@ fun shader2StringBuffer(shader: String): String? {
 }
 
 
+/********************************EGL*******************************/
+//若要调用下面的OpenGL ES方法，需要EGL环境（GLSurfaceView自带了一个，所以不需要调用此方法）
+//fun initEGL() {
+//
+//}
+/******************************************************************/
+
+
 /**************************OpenGL ES*******************************/
 
 private fun loadShader(type: Int, shaderSource: String): Int {

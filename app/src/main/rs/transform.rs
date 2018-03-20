@@ -33,9 +33,9 @@ void RS_KERNEL rgba2nv21(uchar4 in, uint32_t x, uint32_t y) {
   uchar v = _v < 0 ? 0 : (_v > 255 ? 255 : _v);                 //maybe overfloor
 
   uchar3 yuv = (uchar3){lum, u, v};
-  rsSetElementAt_uchar(gNV21_frame, yuv.s0, x+(y*width));      //Y
+  rsSetElementAt_uchar(gNV21_frame, yuv.s0, x+((height-1 - y)*width));      //Y  *通过修改(y)为(height-1 - y)來实现上下翻转
   if(x%2 == 1 && y%2 == 1) {
-    int index = uvStart + (y/2)*width + (x & (~1));
+    int index = uvStart + ((height-1 - y)/2)*width + (x & (~1));  //*通过修改(y)为(height-1 - y)來实现上下翻转
     rsSetElementAt_uchar(gNV21_frame, yuv.s1, index);          //U
     rsSetElementAt_uchar(gNV21_frame, yuv.s2, index+1);        //V
     //下面这种处理方式不对，只能显示一半
