@@ -40,10 +40,18 @@ android {
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets', 'src/main/assets/']
-            //引入so文件
-            jniLibs.srcDirs = ['libs/arm']
+//            //引入so文件   *这里设置了也无效，无法把所指定目录下的so打包到apk中,暂时未知原因
+//            jniLibs.srcDirs = ['libs/arm']
             //引入RenderScript文件
             renderscript.srcDirs = ['src/main/rs', 'src/main/rs/']
+        }
+    }
+    splits {
+        abi {
+            //针对不同API生成只包含其架构so的多个apk
+            enable true
+            reset()
+            include "armeabi", "armeabi-v7a"
         }
     }
 }

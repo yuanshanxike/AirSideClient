@@ -20,8 +20,8 @@ add_library( # Sets the name of the library.
              src/main/cpp/native-lib.cpp )
 
 #head file
-include_directories(src/main/cpp/include/x264
-                    src/main/cpp/include/rtmp)
+include_directories(src/main/cpp/include/x264/
+                    src/main/cpp/include/rtmp/)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -46,9 +46,33 @@ add_library( # Sets the name of the library.
              # Provides a relative path to your source file(s).
              IMPORTED )
 
-set_target_properties(x264
+set_target_properties(# Sets the name of the library.
+                      x264
+
+                      # Sets the library as a shared library.
                       PROPERTIES IMPORTED_LOCATION
-                      ${CMAKE_SOURCE_DIR}/libs/arm/libx264.so)
+
+                      # Provides a relative path to your source file(s).
+                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.so)
+
+# libx264.155
+add_library( # Sets the name of the library.
+             x264.155
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             IMPORTED )
+
+set_target_properties(# Sets the name of the library.
+                      x264.155
+
+                      # Sets the library as a shared library.
+                      PROPERTIES IMPORTED_LOCATION
+
+                      # Provides a relative path to your source file(s).
+                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.155.so)
 
 # librtmp
 add_library( # Sets the name of the library.
@@ -60,9 +84,14 @@ add_library( # Sets the name of the library.
              # Provides a relative path to your source file(s).
              IMPORTED )
 
-set_target_properties(rtmp
+set_target_properties(# Specifies the target library.
+                      rtmp
+
+                      # Specifies the parameter you want to define.
                       PROPERTIES IMPORTED_LOCATION
-                      ${CMAKE_SOURCE_DIR}/libs/arm/librtmp.so)
+
+                      # Provides the path to the library you want to import.
+                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/librtmp.so)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
