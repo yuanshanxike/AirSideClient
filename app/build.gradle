@@ -19,7 +19,7 @@ android {
             }
         }
         ndk {
-            abiFilters "armeabi", "armeabi-v7a"
+            abiFilters "armeabi", "armeabi-v7a", "x86"
         }
 
         //RenderScript settings
@@ -51,7 +51,7 @@ android {
             //针对不同API生成只包含其架构so的多个apk
             enable true
             reset()
-            include "armeabi", "armeabi-v7a"
+            include "armeabi", "armeabi-v7a", "x86"
         }
     }
 }

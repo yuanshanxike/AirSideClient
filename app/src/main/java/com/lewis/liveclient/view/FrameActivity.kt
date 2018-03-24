@@ -10,7 +10,6 @@ import android.support.v8.renderscript.RenderScript
 import android.support.v8.renderscript.Type
 import android.util.Log
 import com.lewis.liveclient.R
-import com.lewis.liveclient.ScriptC_transform
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedOutputStream
 import java.io.File

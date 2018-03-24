@@ -104,4 +104,5 @@ target_link_libraries( # Specifies the target library.
                        # included in the NDK.
                        ${log-lib}
                        x264
+                       x264.155
                        rtmp )

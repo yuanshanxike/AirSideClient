@@ -50,13 +50,13 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 
   private inner class /*companion object*/ CameraRenderer : Renderer {
 
-    //load so
-    init {
-      System.loadLibrary("native-lib")
-    }
-
-    //native func
-    external fun h264Coding(byteArray: ByteArray)
+//    //load so
+//    init {
+//      System.loadLibrary("native-lib")
+//    }
+//
+//    //native func
+//    external fun h264Coding(byteArray: ByteArray)
 
     var _surfaceTexture: SurfaceTexture? = null //备用属性
     val surfaceTexture: SurfaceTexture get() = _surfaceTexture
@@ -115,9 +115,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //      bos.flush()
 //      fos.close()
       //nv21
-//      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
-      val bytes = getNV21FrameBufferByRenderScript((buffer as ByteBuffer).array(), 720, 1280)
-      h264Coding(bytes)
+      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
+//      val bytes = getYUV420FrameBufferByRenderScript((buffer as ByteBuffer).array(), 720, 1280)
+//      h264Coding(bytes)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
