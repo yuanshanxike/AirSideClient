@@ -5,7 +5,11 @@ import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.util.AttributeSet
+import android.view.View
+import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.util.*
 import java.io.BufferedOutputStream
 import java.io.File
@@ -15,6 +19,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.concurrent.thread
 
 /**
  * Created by lewis on 18-2-21.
@@ -28,11 +33,15 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   private var _camera: Camera? = null  //备用属性
   val camera: Camera get() = _camera ?: throw NullPointerException()
 
+  private val cameraRenderer by lazy {
+    CameraRenderer()
+  }
+
   init {
     debugFlags = DEBUG_CHECK_GL_ERROR or DEBUG_LOG_GL_CALLS
 
     setEGLContextClientVersion(2)
-    setRenderer(CameraRenderer())
+    setRenderer(cameraRenderer)
     renderMode = RENDERMODE_WHEN_DIRTY
 
     //camera
@@ -48,6 +57,15 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //    }
   }
 
+  override fun onVisibilityChanged(changedView: View?, visibility: Int) {
+    super.onVisibilityChanged(changedView, visibility)
+    changedView?.let {
+      if (it.visibility != View.VISIBLE) {
+        cameraRenderer.stopEncode()
+      }
+    }
+  }
+
   private inner class /*companion object*/ CameraRenderer : Renderer {
 
 //    //load so
@@ -57,6 +75,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //
 //    //native func
 //    external fun h264Coding(byteArray: ByteArray)
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    val avCodec = AVCodec(720, 1280, "/sdcard/data.mp4")
 
     var _surfaceTexture: SurfaceTexture? = null //备用属性
     val surfaceTexture: SurfaceTexture get() = _surfaceTexture
@@ -115,9 +136,12 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //      bos.flush()
 //      fos.close()
       //nv21
-      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
+//      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
 //      val bytes = getYUV420FrameBufferByRenderScript((buffer as ByteBuffer).array(), 720, 1280)
 //      h264Coding(bytes)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        avCodec.feedData(buffer as ByteBuffer)
+      }
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -148,6 +172,19 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       camera.setPreviewTexture(surfaceTexture)
       //开启预览
       camera.startPreview()
+
+      //开始编码
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        thread(start = true, name = "startEncode") {
+          avCodec.start()
+        }
+      }
+    }
+
+    fun stopEncode() {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        avCodec.stop()
+      }
     }
 
   }

@@ -38,7 +38,7 @@ Java_com_lewis_liveclient_opengl_CameraView_00024CameraRenderer_h264Coding(
   int y_size;    //luminance size
 
   int frame_num = 50;        //文件中包含的帧数
-  int csp = X264_CSP_NV21;   //输入的视频帧格式为nv21
+  int csp = X264_CSP_I420;   //输入的视频帧格式为i420
 
   int iNal = 0;              //
   x264_nal_t* pNals = NULL;
@@ -57,12 +57,15 @@ Java_com_lewis_liveclient_opengl_CameraView_00024CameraRenderer_h264Coding(
   x264_param_default(pParam);
   pParam->i_width = width;
   pParam->i_height = height;
-  pParam->i_frame_total = 0;    //要编码的总帧数，不知道用0
   pParam->i_csp = csp;
   //Param other
   pParam->i_threads = X264_SYNC_LOOKAHEAD_AUTO;
+  pParam->i_frame_total = 0;    //要编码的总帧数，不知道用0
   pParam->i_fps_den = 1;       //码率分母
   pParam->i_fps_num = 30;      //码率分子
+  //参考 http://lazybing.github.io/blog/2017/06/23/x264-paraments-illustra/#section-1
+  pParam->i_keyint_max = 30;   //IDR帧的最大间距（帧）
+  pParam->i_keyint_min = 22;   //IDR帧的最小间距（帧）
 
   x264_param_apply_profile(pParam, x264_preset_names[5]); //x264_preset_names[5] is "medium"
 
