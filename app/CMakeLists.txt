@@ -53,26 +53,7 @@ set_target_properties(# Sets the name of the library.
                       PROPERTIES IMPORTED_LOCATION
 
                       # Provides a relative path to your source file(s).
-                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.so)
-
-# libx264.155
-add_library( # Sets the name of the library.
-             x264.155
-
-             # Sets the library as a shared library.
-             SHARED
-
-             # Provides a relative path to your source file(s).
-             IMPORTED )
-
-set_target_properties(# Sets the name of the library.
-                      x264.155
-
-                      # Sets the library as a shared library.
-                      PROPERTIES IMPORTED_LOCATION
-
-                      # Provides a relative path to your source file(s).
-                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.155.so)
+                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.a)
 
 # librtmp
 add_library( # Sets the name of the library.
@@ -104,5 +85,4 @@ target_link_libraries( # Specifies the target library.
                        # included in the NDK.
                        ${log-lib}
                        x264
-                       x264.155
                        rtmp )

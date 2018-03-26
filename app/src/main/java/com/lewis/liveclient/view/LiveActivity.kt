@@ -16,7 +16,8 @@ class LiveActivity : BaseActivity() {
 
   override fun init() {
     setContentView(R.layout.activity_live)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    supportActionBar?.hide()
 
     mVisible = true
 
@@ -28,6 +29,8 @@ class LiveActivity : BaseActivity() {
     // operations to prevent the jarring behavior of controls going away
     // while interacting with the UI.
     dummy_button.setOnTouchListener(mDelayHideTouchListener)
+
+    back.setOnClickListener { finish() }
   }
 
   override fun onDestroy() {
@@ -36,12 +39,16 @@ class LiveActivity : BaseActivity() {
     super.onDestroy()
   }
 
-  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-    when (item?.itemId) {
-      android.R.id.home ->
-          finish()
-    }
-    return super.onOptionsItemSelected(item)
+//  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+//    when (item?.itemId) {
+//      android.R.id.home ->
+//          finish()
+//    }
+//    return super.onOptionsItemSelected(item)
+//  }
+
+  override fun onBackPressed() {
+    finish()
   }
 
   private val mHideHandler = Handler()
@@ -68,7 +75,8 @@ class LiveActivity : BaseActivity() {
   }
   private val mShowPart2Runnable = Runnable {
     // Delayed display of UI elements
-    supportActionBar?.show()
+//    supportActionBar?.show()
+    topBar.visibility = View.VISIBLE
     fullscreen_content_controls.visibility = View.VISIBLE
   }
   private var mVisible: Boolean = false
@@ -104,7 +112,8 @@ class LiveActivity : BaseActivity() {
 
   private fun hide() {
     // Hide UI first
-    supportActionBar?.hide()
+//    supportActionBar?.hide()
+    topBar.visibility = View.GONE
     fullscreen_content_controls.visibility = View.GONE
     mVisible = false
 

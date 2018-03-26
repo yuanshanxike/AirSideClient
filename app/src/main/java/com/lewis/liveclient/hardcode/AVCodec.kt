@@ -47,7 +47,8 @@ public class AVCodec(private val width: Int,private val height: Int, private val
   private val videoEnc: MediaCodec get() = _videoEnc ?: throw NullPointerException("videoEnc is null")
 
   private var _nowFeedData: ByteBuffer? = null
-  private val nowFeedData: ByteBuffer get() = _nowFeedData ?: throw NullPointerException("nowFeedData is null")
+  private val nullData: ByteBuffer = ByteBuffer.allocate(width * height * 4).position(0) as ByteBuffer   //没有数据时使用备用数据
+  private val nowFeedData: ByteBuffer get() = _nowFeedData ?: nullData /*throw NullPointerException("nowFeedData is null")*/
 
   private var hasNewData: Boolean = false
 
