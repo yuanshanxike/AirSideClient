@@ -57,13 +57,10 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //    }
   }
 
-  override fun onVisibilityChanged(changedView: View?, visibility: Int) {
-    super.onVisibilityChanged(changedView, visibility)
-    changedView?.let {
-      if (it.visibility != View.VISIBLE) {
-        cameraRenderer.stopEncode()
-      }
-    }
+  //当销毁窗口（View从窗口脱离）时进行回调，停止编码
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    cameraRenderer.stopEncode()
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {

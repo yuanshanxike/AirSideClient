@@ -119,6 +119,14 @@ public class AVCodec(private val width: Int,private val height: Int, private val
   public fun start() {
     _nanoTime = System.nanoTime()
     synchronized(this) {
+
+      videoThread?.let {
+        if (it.isAlive) {
+          startFlag = false
+          it.join()
+        }
+      }
+
       //video start
       videoEnc.start()
       startFlag = true
