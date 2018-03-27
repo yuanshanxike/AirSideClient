@@ -10,6 +10,8 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
+set(static_lib_path ${CMAKE_SOURCE_DIR}/src/main/cpp/lib)
+
 add_library( # Sets the name of the library.
              native-lib
 
@@ -41,7 +43,7 @@ add_library( # Sets the name of the library.
              x264
 
              # Sets the library as a shared library.
-             SHARED
+             STATIC
 
              # Provides a relative path to your source file(s).
              IMPORTED )
@@ -53,7 +55,7 @@ set_target_properties(# Sets the name of the library.
                       PROPERTIES IMPORTED_LOCATION
 
                       # Provides a relative path to your source file(s).
-                      ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libx264.a)
+                      ${static_lib_path}/libx264.a)
 
 # librtmp
 add_library( # Sets the name of the library.
