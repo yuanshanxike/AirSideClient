@@ -12,6 +12,9 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(static_lib_path ${CMAKE_SOURCE_DIR}/src/main/cpp/lib)
 
+#mark all source file
+file(GLOB native_source_path src/main/cpp/*.cc src/main/cpp/*.cpp)
+
 add_library( # Sets the name of the library.
              native-lib
 
@@ -19,11 +22,10 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+             ${native_source_path} )
 
 #head file
-include_directories(src/main/cpp/include/x264/
-                    src/main/cpp/include/rtmp/)
+include_directories(src/main/cpp/)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

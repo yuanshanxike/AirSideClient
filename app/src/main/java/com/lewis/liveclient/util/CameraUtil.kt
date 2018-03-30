@@ -37,22 +37,6 @@ fun initCamera(context: Context, isFacing: Boolean = true): Camera {
   cp.setPreviewFpsRange(videoParam.mFpsRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
       videoParam.mFpsRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX])
   camera.parameters = cp
-
-  //处理相机获取的图片帧
-  /*var count = 0
-  camera.setPreviewCallback(Camera.PreviewCallback { data, camera ->
-    count++
-    if (count == 5) {
-      val file = File("/sdcard/camera-rs")
-      if (!file.exists())
-        file.createNewFile()
-      val fos = FileOutputStream(file)
-      val bos = BufferedOutputStream(fos)
-      bos.write(data)
-      bos.flush()
-      fos.close()
-    }
-  })*/
   return camera
 }
 

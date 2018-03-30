@@ -5,7 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.util.Log
-import android.view.Surface
+import com.lewis.liveclient.jniLink.packAVCFrame
 import com.lewis.liveclient.util.getYUV420FrameBufferByRenderScript
 import java.io.File
 import java.lang.RuntimeException
@@ -19,7 +19,7 @@ import kotlin.concurrent.thread
  */
 
 public class AVCodec(private val width: Int,private val height: Int, private val filePath: String) {
-  private val muxer: MediaMuxer = MediaMuxer(filePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) //多路复用器，用于音视频混合
+//  private val muxer: MediaMuxer = MediaMuxer(filePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) //多路复用器，用于音视频混合
 
   private val videoMime = "video/avc"
   private val rate = 2280000    //
@@ -171,10 +171,10 @@ public class AVCodec(private val width: Int,private val height: Int, private val
         videoEnc.release()
 
         //Muxer Stop
-        audioTrack = -1
-        videoTrack = -1
-        muxer.stop()
-        muxer.release()
+//        audioTrack = -1
+//        videoTrack = -1
+//        muxer.stop()
+//        muxer.release()
       }
     } catch (e: Exception) {
       e.printStackTrace()
@@ -200,9 +200,10 @@ public class AVCodec(private val width: Int,private val height: Int, private val
     do {
       if (outIndex >= 0) {
         val outBuf = getOutputBuffer(outIndex)
-        if (/*audioTrack>=0 &&*/ videoTrack>=0 && info.size>0 && info.presentationTimeUs>0) {
-          muxer.writeSampleData(videoTrack, outBuf, info)
-        }
+//        if (/*audioTrack>=0 &&*/ videoTrack>=0 && info.size>0 && info.presentationTimeUs>0) {
+//          muxer.writeSampleData(videoTrack, outBuf, info)
+          packAVCFrame(outBuf, info)
+//        }
         videoEnc.releaseOutputBuffer(outIndex, false)
         outIndex = videoEnc.dequeueOutputBuffer(info, 0)
         if (info.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
@@ -210,9 +211,9 @@ public class AVCodec(private val width: Int,private val height: Int, private val
           return true
         }
       } else if (outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-        videoTrack = muxer.addTrack(videoEnc.outputFormat)
-        if (/*audioTrack >= 0 &&*/ videoTrack >= 0)
-          muxer.start()
+//        videoTrack = muxer.addTrack(videoEnc.outputFormat)
+//        if (/*audioTrack >= 0 &&*/ videoTrack >= 0)
+//          muxer.start()
       }
     }while (outIndex >= 0)
     return false

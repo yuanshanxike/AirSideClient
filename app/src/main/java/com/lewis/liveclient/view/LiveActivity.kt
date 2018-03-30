@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.lewis.liveclient.R
+import com.lewis.liveclient.callback.OnRtmpConnectListener
+import com.lewis.liveclient.jniLink.LivePusher
 import com.lewis.liveclient.util.camera
 import com.lewis.liveclient.util.deleteOpenGLES
 import kotlinx.android.synthetic.main.activity_live.*
@@ -12,7 +15,15 @@ import kotlinx.android.synthetic.main.activity_live.*
 /**
  * Create by lewis 17-11-26
  */
-class LiveActivity : BaseActivity() {
+class LiveActivity : BaseActivity(), OnRtmpConnectListener {
+
+  init {
+    LivePusher.listener = this
+  }
+
+  override fun rtmpConnect(msg: String, code: Int) {
+    Toast.makeText(this, msg + " code: $code", Toast.LENGTH_SHORT).show()
+  }
 
   override fun init() {
     setContentView(R.layout.activity_live)

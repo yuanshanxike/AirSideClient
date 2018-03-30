@@ -1,87 +1,132 @@
 #include <jni.h>
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-#include "include/x264/x264.h"
-#include "include/rtmp/rtmp_sys.h"
+#include "Live.h"
 
-extern "C"
-JNIEXPORT jstring
+extern "C" {
+//JNIEXPORT jstring
+//
+//JNICALL
+//Java_com_lewis_liveclient_MainActivity_stringFromJNI(
+//    JNIEnv *env,
+//    jobject /* this */) {
+//  std::string hello = "Hello from C++";
+//
+//  return env->NewStringUTF(hello.c_str());
+//}
 
-JNICALL
-Java_com_lewis_liveclient_MainActivity_stringFromJNI(
-    JNIEnv *env,
-    jobject /* this */) {
-  std::string hello = "Hello from C++";
+JavaVM* jvm = NULL;
+jobject obj = NULL;
 
-  return env->NewStringUTF(hello.c_str());
+Live* live;
+
+//this called by JNI, not provided by JNI
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+  jvm = vm;
+  JNIEnv* env = NULL;
+  jint result = -1;
+  if (vm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK) {
+    return result;
+  }
+  return JNI_VERSION_1_4;
 }
 
-/*******************************x264****************************************/
 
-extern "C"
-JNIEXPORT void
-
-JNICALL
-Java_com_lewis_liveclient_opengl_CameraView_00024CameraRenderer_h264Coding(
-    JNIEnv *env,
-    jobject /* this */,
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_initLive(
+    JNIEnv* env,
+    jobject thiz,
+    jstring rtmpUrl_,
     jint width,
     jint height,
-    jcharArray path /*yuv图像帧(多个)缓存的文件路径*/
+    jint bitRate
 ) {
-  char* _path = (char*)env->GetCharArrayElements(path, 0);
-
-  FILE* fp_src = fopen(_path, "rb");
-
-  int ret;       //码率
-  int y_size;    //luminance size
-
-  int frame_num = 50;        //文件中包含的帧数
-  int csp = X264_CSP_I420;   //输入的视频帧格式为i420
-
-  int iNal = 0;              //
-  x264_nal_t* pNals = NULL;
-  x264_t* pHandle = NULL;
-  x264_picture_t* pPic_in = (x264_picture_t*)malloc(sizeof(x264_picture_t));
-  x264_picture_t* pPic_out = (x264_picture_t*)malloc(sizeof(x264_picture_t));
-  x264_param_t* pParam = (x264_param_t*)malloc(sizeof(x264_param_t));
-
-  //check
-  if (fp_src == NULL) {
-    //android log
-
-    return;
+  if (!obj) {
+    obj = env->NewGlobalRef(thiz);
   }
-
-  x264_param_default(pParam);
-  pParam->i_width = width;
-  pParam->i_height = height;
-  pParam->i_csp = csp;
-  //Param other
-  pParam->i_threads = X264_SYNC_LOOKAHEAD_AUTO;
-  pParam->i_frame_total = 0;    //要编码的总帧数，不知道用0
-  pParam->i_fps_den = 1;       //码率分母
-  pParam->i_fps_num = 30;      //码率分子
-  //参考 http://lazybing.github.io/blog/2017/06/23/x264-paraments-illustra/#section-1
-  pParam->i_keyint_max = 30;   //IDR帧的最大间距（帧）
-  pParam->i_keyint_min = 22;   //IDR帧的最小间距（帧）
-
-  x264_param_apply_profile(pParam, x264_preset_names[5]); //x264_preset_names[5] is "medium"
-
-  pHandle = x264_encoder_open(pParam);
-
-  x264_picture_init(pPic_out);
-  x264_picture_alloc(pPic_in, csp, width, height);
-
-
+  live = new Live(jvm, obj);
+  if (live) {
+    const char* rtmpUrl = env->GetStringUTFChars(rtmpUrl_, 0);
+    live->init(rtmpUrl, width, height, bitRate);
+    env->ReleaseStringUTFChars(rtmpUrl_, rtmpUrl);
+  }
 }
 
-/******************************rtmp**************************************/
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_initX264Encode(
+    JNIEnv* env,
+    jobject thiz,
+    jint threadSize
+) {
+  if (!live)
+    return;
+  live->initX264Encode(threadSize);
+}
 
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_x264Coding(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray yuv_
+) {
+  if (!live)
+    return;
+  jbyte *yuv = env->GetByteArrayElements(yuv_, 0);
 
-//  RTMP *rtmp = NULL;
-//  RTMPPacket *packet = NULL;
-//
-//  rtmp = RTMP_Alloc();
-//  RTMP_Init(rtmp);
+  live->startX264Encode((uchar*)yuv);
+
+  env->ReleaseByteArrayElements(yuv_, yuv, 0);
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_startPush(
+    JNIEnv* env,
+    jobject thiz
+) {
+  if (!live)
+    return;
+  live->startPush();
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_send_1sps_1pps(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray sps_,
+    jint sps_length,
+    jbyteArray pps_,
+    jint pps_length
+) {
+  if (!live)
+    return;
+  jbyte* sps = env->GetByteArrayElements(sps_, 0);
+  jbyte* pps = env->GetByteArrayElements(pps_, 0);
+
+  live->add_264_header((uchar*)sps, sps_length, (uchar*)pps, pps_length);
+
+  env->ReleaseByteArrayElements(sps_, sps, 0);
+  env->ReleaseByteArrayElements(sps_, sps, 0);
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_send_1video_1body(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray body_,
+    jint body_length
+) {
+  if (!live)
+    return;
+  jbyte* body = env->GetByteArrayElements(body_, 0);
+
+  live->add_264_body((uchar*)body, body_length);
+
+  env->ReleaseByteArrayElements(body_, body, 0);
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_stopRTMP(
+    JNIEnv* env,
+    jobject thiz
+) {
+  if (live) {
+    live->stop();
+    delete live;
+  }
+  jvm = NULL;
+  obj = NULL;
+  live = NULL;
+}
+
+}

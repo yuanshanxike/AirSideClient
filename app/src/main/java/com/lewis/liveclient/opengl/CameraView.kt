@@ -8,12 +8,10 @@ import android.opengl.GLSurfaceView
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
-import android.view.View
 import com.lewis.liveclient.hardcode.AVCodec
+import com.lewis.liveclient.jniLink.startLive
+import com.lewis.liveclient.jniLink.stopLive
 import com.lewis.liveclient.util.*
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -61,6 +59,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
     cameraRenderer.stopEncode()
+    stopLive()
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {
@@ -174,6 +173,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         thread(start = true, name = "startEncode") {
           avCodec.start()
+          startLive("rtmp://send1a.douyu.com/live/3796285r0oaXlsWM?wsSecret=3d5449ad6c2ad5313a650acc9efde032&wsTime=5abe4b92&wsSeek=off&wm=0&tw=0"
+              , 720, 1280, 0/*not use*/)
         }
       }
     }
