@@ -173,7 +173,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         thread(start = true, name = "startEncode") {
           avCodec.start()
-          startLive("rtmp://send1a.douyu.com/live/3796285r0oaXlsWM?wsSecret=3d5449ad6c2ad5313a650acc9efde032&wsTime=5abe4b92&wsSeek=off&wm=0&tw=0"
+          startLive("rtmp://send1a.douyu.com/live/3796285ryrUncslb?wsSecret=8d413ff3240e7a8387c0940e058d37b6&wsTime=5abf543d&wsSeek=off&wm=0&tw=0"
               , 720, 1280, 0/*not use*/)
         }
       }

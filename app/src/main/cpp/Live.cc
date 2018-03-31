@@ -117,7 +117,7 @@ void Live::add_264_body(uchar *buf, int len) {
     len -= 4;
   } else if (buf[2] == 0x01) { //00 00 01
     buf += 3;
-    len -= 3;//3;
+    len -= 3;
   }
   int body_size = len + 9;
   RTMPPacket *packet = (RTMPPacket*)malloc(sizeof(RTMPPacket));
@@ -142,7 +142,8 @@ void Live::add_264_body(uchar *buf, int len) {
   packet->m_hasAbsTimestamp = 0;
   packet->m_nBodySize = (uint32_t)body_size;
   packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
-  packet->m_nChannel = RTMP_PACKET_SIZE_LARGE;
+  packet->m_nChannel = 0x04;
+  packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
   packet->m_nTimeStamp = RTMP_GetTime() - start_time;
 
   addPacket(packet, true);
@@ -272,6 +273,7 @@ void *Live::push(void *args) {
           }
           RTMPPacket_Free(packet);
           free(packet);
+          //LOGD("push rtmp");
         }
       }
       pthread_mutex_unlock(&live->mutex);
