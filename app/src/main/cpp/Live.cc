@@ -215,6 +215,7 @@ void *Live::push(void *args) {
   do {
     live->rtmpClient = RTMP_Alloc();
     if (!live->rtmpClient) {
+      LOGD("client is null!");
       live->throwNativeInfo(env, postID, -101);
       goto END;
     }
@@ -222,15 +223,18 @@ void *Live::push(void *args) {
     live->rtmpClient->Link.timeout = 3;
     live->rtmpClient->Link.flashVer = RTMP_DefaultFlashVer;
     if (!RTMP_SetupURL(live->rtmpClient, live->rtmpUrl)) {
+      LOGD("url set fail!");
       live->throwNativeInfo(env, postID, -102);
       goto END;
     }
     RTMP_EnableWrite(live->rtmpClient);
     if (!RTMP_Connect(live->rtmpClient, NULL)) {
+      LOGD("rtmp connect fail!");
       live->throwNativeInfo(env, postID, -103);
       goto END;
     }
     if (!RTMP_ConnectStream(live->rtmpClient, 0)) {
+      LOGD("rtmp connect stream fail!");
       live->throwNativeInfo(env, postID, -104);
       goto END;
     }
@@ -284,7 +288,31 @@ void *Live::push(void *args) {
     RTMP_FREE(live->rtmpClient)
   }while (false);    //just exc once?
 
+  LOGD("----------- release queue");
+  int size = live->rtmpQueue.size();
+  for (int i = 0; i < size; ++i) {
+    RTMPPacket* packet = live->rtmpQueue.front();
+    live->rtmpQueue.pop();
+    if (packet) {
+      RTMPPacket_Free(packet);
+      free(packet);
+    }
+  }
 
+  LOGD("----------- release url str");
+  delete live->rtmpUrl;
+  live->rtmpUrl = NULL;
+
+  LOGD("----------- notify java status");
+  live->throwNativeInfo(env, postID, 101); //java不会再接收数据回调
+
+  LOGD("----------- detach jvm thread");
+  live->jvm->DetachCurrentThread();        //从当前线程中释放jni环境的占用
+  live->pushFlag = false;
+
+
+  LOGD("push exit");
+  pthread_exit(NULL);
 
   return nullptr;
 }
