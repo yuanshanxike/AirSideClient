@@ -2,6 +2,7 @@ package com.lewis.liveclient.view
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -47,6 +48,8 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
   override fun onDestroy() {
     deleteOpenGLES()
     camera.stopPreview()
+    cameraView.onActivityDestroy()
+    LivePusher.listener = null
     super.onDestroy()
   }
 

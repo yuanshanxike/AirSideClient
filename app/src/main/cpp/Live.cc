@@ -308,6 +308,7 @@ void *Live::push(void *args) {
 
   LOGD("----------- detach jvm thread");
   live->jvm->DetachCurrentThread();        //从当前线程中释放jni环境的占用
+  env = NULL;
   live->pushFlag = false;
 
 

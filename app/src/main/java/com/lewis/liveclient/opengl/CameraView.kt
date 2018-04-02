@@ -55,9 +55,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //    }
   }
 
-  //当销毁窗口（View从窗口脱离）时进行回调，停止编码
-  override fun onDetachedFromWindow() {
-    super.onDetachedFromWindow()
+  //onDestroy的回调
+  fun onActivityDestroy() {
     cameraRenderer.stopEncode()
     stopLive()
   }

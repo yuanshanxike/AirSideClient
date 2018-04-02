@@ -20,6 +20,7 @@ Live* live;
 
 //this called by JNI, not provided by JNI
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+  LOGD("------ call JNI_OnLoad");
   jvm = vm;
   JNIEnv* env = NULL;
   jint result = -1;
@@ -124,7 +125,6 @@ JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_stopRTMP(
     live->stop();
     delete live;
   }
-  jvm = NULL;
   obj = NULL;
   live = NULL;
 }

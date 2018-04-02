@@ -55,10 +55,12 @@ class Live {
 
  public:
   Live(JavaVM* vm, jobject obj):
-      jvm(vm), jobj(obj), width(0), height(0){}
+      jvm(vm), jobj(obj), width(0), height(0){
+    LOGD("call the constructor");
+  }
 
   virtual ~Live(){
-
+    LOGD("call the destructor");
   }
 
  public:
