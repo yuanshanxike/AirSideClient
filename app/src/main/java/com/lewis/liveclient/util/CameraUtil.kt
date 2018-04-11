@@ -7,7 +7,7 @@ import android.widget.Toast
 
 /**
  * Created by lewis on 18-2-24.
- *
+ * 相机控制工具
  */
 private var _camera: Camera? = null  //备用属性
 val camera: Camera get() = _camera ?: throw NullPointerException()

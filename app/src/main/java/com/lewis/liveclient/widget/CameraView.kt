@@ -1,6 +1,7 @@
-package com.lewis.liveclient.opengl
+package com.lewis.liveclient.widget
 
 import android.content.Context
+import android.graphics.PixelFormat
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.opengl.GLES20
@@ -11,6 +12,7 @@ import android.util.AttributeSet
 import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.jniLink.startLive
 import com.lewis.liveclient.jniLink.stopLive
+import com.lewis.liveclient.opengl.GPUImageLiveRender
 import com.lewis.liveclient.util.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -31,16 +33,14 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   private var _camera: Camera? = null  //备用属性
   val camera: Camera get() = _camera ?: throw NullPointerException()
 
-  private val cameraRenderer by lazy {
-    CameraRenderer()
+  private val render by lazy {
+    filter?.let {
+      GPUImageLiveRender(it)
+    } ?: CameraRenderer()
   }
 
   init {
     debugFlags = DEBUG_CHECK_GL_ERROR or DEBUG_LOG_GL_CALLS
-
-    setEGLContextClientVersion(2)
-    setRenderer(cameraRenderer)
-    renderMode = RENDERMODE_WHEN_DIRTY
 
     //camera
 //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -53,34 +53,42 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //    } else {
       _camera = initCamera(context)
 //    }
+
+    setEGLContextClientVersion(2)
+    when(render) {
+      is GPUImageLiveRender->{
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+        holder.setFormat(PixelFormat.RGBA_8888)
+        (render as GPUImageLiveRender).setUpSurfaceTexture(camera)
+        (render as GPUImageLiveRender).autoAdaptCameraView()
+        setRenderer(render)
+        renderMode = RENDERMODE_CONTINUOUSLY
+      }
+      is CameraRenderer->{
+        setRenderer(render)
+        renderMode = RENDERMODE_WHEN_DIRTY
+      }
+    }
   }
 
   //onDestroy的回调
   fun onActivityDestroy() {
-    cameraRenderer.stopEncode()
+    when(render) {
+      is GPUImageLiveRender->(render as GPUImageLiveRender).stopEncode()
+      is CameraRenderer->(render as CameraRenderer).stopEncode()
+    }
     stopLive()
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {
 
-//    //load so
-//    init {
-//      System.loadLibrary("native-lib")
-//    }
-//
-//    //native func
-//    external fun h264Coding(byteArray: ByteArray)
-
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    val avCodec = AVCodec(720, 1280, "/sdcard/data.mp4")
+    private val avCodec = AVCodec(720, 1280)
 
-    var _surfaceTexture: SurfaceTexture? = null //备用属性
-    val surfaceTexture: SurfaceTexture get() = _surfaceTexture
+    private var _surfaceTexture: SurfaceTexture? = null //备用属性
+    private val surfaceTexture: SurfaceTexture get() = _surfaceTexture
         ?: throw NullPointerException("_surfaceTexture is null")
-    val transformMatrix = FloatArray(16)
-
-    private val VERTEX_SHADER: String? = shader2StringBuffer("vertex_shader.glsl")
-    private val FRAGMENT_SHADER: String? = shader2StringBuffer("fragment_shader.glsl")
+    private val transformMatrix = FloatArray(16)
 
     //顶点和纹理坐标
     private val vfData: FloatArray = floatArrayOf(
@@ -106,6 +114,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       }
     }
 
+    //用来存放从texture中读出來的像素数据
+    private val buffer = ByteBuffer.allocate(720*1280*4)
+
     override fun onDrawFrame(gl: GL10?) {
       GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)  //white
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
@@ -117,23 +128,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       startPipeline(dataBuffer, transformMatrix)
       isOnSurfaceCreated = false
 
-      val buffer = ByteBuffer.allocate(720*1280*4).position(0)
+      buffer.position(0)
       GLES20.glReadPixels(0, 0, 720, 1280, GLES20.GL_RGBA   //耗时操作
           , GLES20.GL_UNSIGNED_BYTE, buffer)
-      //rgba
-//      val path = "/sdcard/img-rs.nv21"
-//      val file = File(path)
-//      if (!file.exists())
-//        file.createNewFile()
-//      val fos = FileOutputStream(file)
-//      val bos = BufferedOutputStream(fos)
-//      bos.write((buffer as ByteBuffer).array())
-//      bos.flush()
-//      fos.close()
-      //nv21
-//      testRenderScriptBySaveYUVFromBuffer((buffer as ByteBuffer).array(), 720, 1280)
-//      val bytes = getYUV420FrameBufferByRenderScript((buffer as ByteBuffer).array(), 720, 1280)
-//      h264Coding(bytes)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         avCodec.feedData(buffer as ByteBuffer)
       }
@@ -146,6 +143,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
       // 该方法在渲染开始前调用，OpenGL ES的绘制上下文被重建时也会调用。
       //当Activity暂停时，绘制上下文会丢失，当Activity恢复时，绘制上下文会重建。
+      val VERTEX_SHADER: String? = shader2StringBuffer("vertex_shader.glsl")
+      val FRAGMENT_SHADER: String? = shader2StringBuffer("fragment_shader.glsl")
+
       if (VERTEX_SHADER != null && FRAGMENT_SHADER != null)
         initShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER)
 
@@ -172,8 +172,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         thread(start = true, name = "startEncode") {
           avCodec.start()
-          startLive("rtmp://send1a.douyu.com/live/3796285ryrUncslb?wsSecret=8d413ff3240e7a8387c0940e058d37b6&wsTime=5abf543d&wsSeek=off&wm=0&tw=0"
-              , 720, 1280, 0/*not use*/)
+          startLive(rtmpUrl, SupportSize.VERTICAL_HD.width, SupportSize.VERTICAL_HD.height
+              , 0/*not use*/)
         }
       }
     }

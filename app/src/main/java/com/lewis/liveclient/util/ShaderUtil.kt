@@ -12,6 +12,7 @@ import java.nio.FloatBuffer
 
 /**
  * Created by lewis on 18-2-25.
+ * OpenGL ES操作shader工具
  */
 
 /***********************read shader*****************************/

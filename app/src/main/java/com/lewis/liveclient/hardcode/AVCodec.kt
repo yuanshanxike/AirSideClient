@@ -18,7 +18,7 @@ import kotlin.concurrent.thread
  *
  */
 
-public class AVCodec(private val width: Int,private val height: Int, private val filePath: String) {
+public class AVCodec(private val width: Int,private val height: Int/*, private val filePath: String*/) {
 //  private val muxer: MediaMuxer = MediaMuxer(filePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) //多路复用器，用于音视频混合
 
   private val videoMime = "video/avc"
@@ -71,8 +71,8 @@ public class AVCodec(private val width: Int,private val height: Int, private val
     }
 
   init {
-    val file = File(filePath)
-    if (!file.exists()) file.createNewFile()
+//    val file = File(filePath)
+//    if (!file.exists()) file.createNewFile()
     //准备Audio
 
     //准备Video
@@ -153,8 +153,8 @@ public class AVCodec(private val width: Int,private val height: Int, private val
     cancelFlag = true
     stop()
     cancelFlag = false
-    val file = File(filePath)
-    if (file.exists()) file.delete()
+//    val file = File(filePath)
+//    if (file.exists()) file.delete()
   }
 
   public fun stop() {

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.lewis.liveclient.view.FrameActivity">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@android:color/white"
+  tools:context="com.lewis.liveclient.view.FrameActivity">
 
-    <!--<com.lewis.liveclient.animation.MyFrameLayout
+  <!--<com.lewis.liveclient.animation.MyFrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         >
 
     </com.lewis.liveclient.animation.MyFrameLayout>-->
 
-    <!--<TextView
+  <!--<TextView
         android:id="@+id/sample_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,15 +27,88 @@
         app:startColor="@color/colorPrimary"
         app:endColor="@color/colorAccent" />-->
 
-    <Button
-        android:id="@+id/start_live"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开始直播"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-        <!--android:onClick="onClick"/>-->
+  <Button
+    android:id="@+id/start_live"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:text="开始直播"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+    app:layout_constraintVertical_bias="0.66"/>
+
+  <android.support.constraint.ConstraintLayout
+    android:id="@+id/constraintLayout"
+    android:layout_width="290dp"
+    android:layout_height="222dp"
+    android:layout_marginTop="112dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <TextView
+      android:id="@+id/textView5"
+      android:layout_width="234dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:gravity="center_vertical"
+      android:text="推流地址:"
+      android:textColor="@android:color/black"
+      android:textSize="18sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+      android:id="@+id/textView6"
+      android:layout_width="234dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="116dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:gravity="center_vertical"
+      android:text="直播码:"
+      android:textColor="@android:color/black"
+      android:textSize="18sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"/>
+    <EditText
+      android:id="@+id/rtmp_address"
+      android:layout_width="234dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:ems="10"
+      android:inputType="textPersonName"
+      android:text="rtmp://"
+      android:textColor="?attr/colorControlActivated"
+      android:textSize="14sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/textView5"/>
+    <EditText
+      android:id="@+id/rtmp_code"
+      android:layout_width="234dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:ems="10"
+      android:inputType="textPersonName"
+      android:text="example"
+      android:textColor="?android:attr/colorActivatedHighlight"
+      android:textSize="14sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/textView6"/>
+  </android.support.constraint.ConstraintLayout>
+  <!--android:onClick="onClick"/>-->
 
 </android.support.constraint.ConstraintLayout>

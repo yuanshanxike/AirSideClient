@@ -10,6 +10,8 @@ import android.support.v8.renderscript.RenderScript
 import android.support.v8.renderscript.Type
 import android.util.Log
 import com.lewis.liveclient.R
+import com.lewis.liveclient.util.rtmpAddress
+import com.lewis.liveclient.util.rtmpCode
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedOutputStream
 import java.io.File
@@ -27,6 +29,9 @@ class FrameActivity : BaseActivity() {
     setContentView(R.layout.activity_main)
 
     start_live.setOnClickListener {
+      rtmpAddress = rtmp_address.text.toString()
+      rtmpCode = rtmp_code.text.toString()
+
       val intent = Intent()
       intent.setClass(this, LiveActivity::class.java)
       startActivity(intent)

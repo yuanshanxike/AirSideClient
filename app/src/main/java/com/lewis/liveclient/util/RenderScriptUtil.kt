@@ -13,6 +13,7 @@ import java.io.FileOutputStream
 
 /**
  * Created by lewis on 18-3-19.
+ * RenderScript相关控制工具
  */
 
 private var _rs: RenderScript? = null
