@@ -105,22 +105,22 @@ private fun loadShader(type: Int, shaderSource: String): Int {
   return shader
 }
 
-private fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
-  val program = glCreateProgram()
+//private fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
+//  val program = glCreateProgram()
+//
+//  if (program == 0) {
+//    throw RuntimeException("Create Program Failed! \n ${glGetError()}")
+//  }
+//
+//  glAttachShader(program, vsId)
+//  glAttachShader(program, fsId)
+//  glLinkProgram(program)
+//  glUseProgram(program)
+//
+//  return program
+//}
 
-  if (program == 0) {
-    throw RuntimeException("Create Program Failed! \n ${glGetError()}")
-  }
-
-  glAttachShader(program, vsId)
-  glAttachShader(program, fsId)
-  glLinkProgram(program)
-  glUseProgram(program)
-
-  return program
-}
-
-//提供一个外部纹理（给相机使用时，用于接收预览数据）
+//提供一个外部纹理（给相机使用时，用于接收预览数据）注：此纹理默认是绑定到0号framebuffer（GLSurfaceView窗口）上的
 val OESTextureId by lazy {
   val tex = IntArray(1)
   //生成一个纹理
@@ -137,46 +137,131 @@ val OESTextureId by lazy {
   return@lazy tex[0]
 }
 
-private var _shaderProgram: Int? = null
-private var _vertexShader: Int? = null
-private var _fagmentShader: Int? = null
-private val mFBOIds = IntArray(1)
+//private var _shaderProgram: Int? = null
+//private var _vertexShader: Int? = null
+//private var _fragmentShader: Int? = null
+//private val mFBOIds = IntArray(1)
 
-fun initShaderProgram(vsSource: String, fsSource: String): Int {
-  val vertexShader = loadShader(GL_VERTEX_SHADER, vsSource)
-  val fragmentShader = loadShader(GL_FRAGMENT_SHADER, fsSource)
-  val shaderProgram = createAndLinkProgram(vertexShader, fragmentShader)
+//fun initShaderProgram(vsSource: String, fsSource: String): Int {
+//  val vertexShader = loadShader(GL_VERTEX_SHADER, vsSource)
+//  val fragmentShader = loadShader(GL_FRAGMENT_SHADER, fsSource)
+//  val shaderProgram = createAndLinkProgram(vertexShader, fragmentShader)
+//
+//  _vertexShader = vertexShader
+//  _fragmentShader = fragmentShader
+//  _shaderProgram = shaderProgram
+//
+//  //为创建的texture提供一个framebuffer (用来进行离屏渲染的FBO)
+//  glGenFramebuffers(1, mFBOIds, 0)
+//  glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0])
+//  return shaderProgram
+//}
 
-  _vertexShader = vertexShader
-  _fagmentShader = fragmentShader
-  _shaderProgram = shaderProgram
+//fun startPipeline(vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
+//  val aPositionLocation = _shaderProgram?.let {
+//    glGetAttribLocation(it, "aPosition")
+//  } ?: throw NullPointerException("aPositionLocation is null")
+//  val aTextureCoordLocation = _shaderProgram?.let {
+//    glGetAttribLocation(it, "aTextureCoordinate")
+//  } ?: throw NullPointerException("aTextureCoordLocation is null")
+//  val uTextureMatrixLocation = _shaderProgram?.let {
+//    glGetUniformLocation(it, "uTextureMatrix")
+//  } ?: throw NullPointerException("uTextureMatrixLocation is null")
+//  val uTextureSamplerLocation = _shaderProgram?.let {
+//    glGetUniformLocation(it, "uTextureSampler")
+//  } ?: throw NullPointerException("uTextureSamplerLocation is null")
+//
+//  //激活纹理单元0
+//  glActiveTexture(GL_TEXTURE0)
+//  //绑定外部纹理到纹理单元0
+//  glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, OESTextureId)
+//  //将此纹理单元传为片段着色器的uTextureSampler外部纹理采样器
+//  glUniform1i(uTextureSamplerLocation, 0/*GL_TEXTURE0*/)
+//
+//  //将纹理矩阵传给片段着色器
+//  glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0)
+//
+//  //将顶点和纹理坐标传给顶点着色器
+//  vfBuffer.position(0)
+//  glEnableVertexAttribArray(aPositionLocation)
+//  //顶点坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
+//  glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, vfBuffer)
+//
+//  //纹理坐标从位置2开始读取
+//  vfBuffer.position(2)
+//  glEnableVertexAttribArray(aTextureCoordLocation)
+//  //纹理坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
+//  glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, vfBuffer)
+//
+//  //绘制两个三角形（6个顶点）
+//  glDrawArrays(GL_TRIANGLES, 0, 6)
+//
+//  //为了让所有的渲染操作对主窗口产生影响我们必须通过绑定为0来使默认帧缓冲被激活
+//  glBindFramebuffer(GL_FRAMEBUFFER, 0)
+//}
 
-  //为创建的texture提供一个framebuffer (用来进行离屏渲染的FBO)
-  glGenFramebuffers(1, mFBOIds, 0)
-  glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0])
-  return shaderProgram
+/****************************more than one gl program***************************************/
+
+private var _shaderPrograms: IntArray? = null
+
+private fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
+  val program = glCreateProgram()
+
+  if (program == 0) {
+    throw RuntimeException("Create Program Failed! \n ${glGetError()}")
+  }
+
+  glAttachShader(program, vsId)
+  glAttachShader(program, fsId)
+  glLinkProgram(program)
+
+  return program
 }
 
-fun startPipeline(vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
-  val aPositionLocation = _shaderProgram?.let {
-    glGetAttribLocation(it, "aPosition")
+fun createShaderPrograms(n: Int, vsSourceArray: Array<String>, fsSourceArray: Array<String>)
+    : IntArray {
+  val shaderPrograms = IntArray(n)
+  for (i in 0 until n) {
+    val vertexShader = loadShader(GL_VERTEX_SHADER, vsSourceArray[i])
+    val fragmentShader = loadShader(GL_FRAGMENT_SHADER, fsSourceArray[i])
+    shaderPrograms[i] = createAndLinkProgram(vertexShader, fragmentShader)
+  }
+  _shaderPrograms = shaderPrograms
+  return shaderPrograms
+}
+
+fun useProgramByIndex(programIndex: Int) {
+  _shaderPrograms?.let {
+    if (programIndex < nShader)
+      glUseProgram(it[programIndex])
+  } ?: throw NullPointerException("_shaderPrograms is null")
+}
+
+fun startPipeline(index: Int, vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
+  val aPositionLocation = _shaderPrograms?.let {
+    glGetAttribLocation(it[index], "aPosition")
   } ?: throw NullPointerException("aPositionLocation is null")
-  val aTextureCoordLocation = _shaderProgram?.let {
-    glGetAttribLocation(it, "aTextureCoordinate")
+  val aTextureCoordLocation = _shaderPrograms?.let {
+    glGetAttribLocation(it[index], "aTextureCoordinate")
   } ?: throw NullPointerException("aTextureCoordLocation is null")
-  val uTextureMatrixLocation = _shaderProgram?.let {
-    glGetUniformLocation(it, "uTextureMatrix")
+  val uTextureMatrixLocation = _shaderPrograms?.let {
+    glGetUniformLocation(it[index], "uTextureMatrix")
   } ?: throw NullPointerException("uTextureMatrixLocation is null")
-  val uTextureSamplerLocation = _shaderProgram?.let {
-    glGetUniformLocation(it, "uTextureSampler")
+  val uTextureSamplerLocation = _shaderPrograms?.let {
+    glGetUniformLocation(it[index], "uTextureSampler")
   } ?: throw NullPointerException("uTextureSamplerLocation is null")
 
-  //激活纹理单元0
-  glActiveTexture(GL_TEXTURE0)
-  //绑定外部纹理到纹理单元0
-  glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, OESTextureId)
-  //将此纹理单元传为片段着色器的uTextureSampler外部纹理采样器
-  glUniform1i(uTextureSamplerLocation, 0)
+//  /*三种方式都是可行的，任选其一就可以*/
+//  //激活纹理单元0（方式一）
+//  glActiveTexture(GL_TEXTURE0)
+//  //将0号纹理单元传为片段着色器的uTextureSampler纹理采样器
+//  glUniform1i(uTextureSamplerLocation, 0/*GL_TEXTURE0*/)
+//  //绑定到外部纹理纹理（方式二）
+//  glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, OESTextureId)
+//  //将外部纹理单元传为片段着色器的uTextureSampler外部纹理采样器
+//  glUniform1i(uTextureSamplerLocation, GLES11Ext.GL_TEXTURE_EXTERNAL_OES)
+//  //使用默认绑定。因为shader中只有一个采样器（0号framebuffer上的纹理），所以可直接设置采样器Uniform为0(或GL_TEXTURE0) 或 直接不写(默认值就是0)（方法三）
+//  glUniform1i(uTextureSamplerLocation, 0)    //亲测，只要赋的值是0或>=8的数都可以正常进行采样
 
   //将纹理矩阵传给片段着色器
   glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0)
@@ -195,22 +280,20 @@ fun startPipeline(vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
 
   //绘制两个三角形（6个顶点）
   glDrawArrays(GL_TRIANGLES, 0, 6)
-
-  //为了让所有的渲染操作对主窗口产生影响我们必须通过绑定为0来使默认帧缓冲被激活
-  glBindFramebuffer(GL_FRAMEBUFFER, 0)
 }
 
-//when onDestroy call this function
-fun deleteOpenGLES() {
-  _shaderProgram?.let {
-    glDeleteProgram(it)
-  }
-  _vertexShader?.let {
-    glDeleteShader(it)
-  }
-  _fagmentShader?.let {
-    glDeleteShader(it)
-  }
-  glDeleteTextures(1, intArrayOf(OESTextureId), 0)
-  glDeleteFramebuffers(1, mFBOIds, 0)
-}
+
+//clear gl
+//fun deleteOpenGLES() {
+//  _shaderProgram?.let {
+//    glDeleteProgram(it)
+//  }
+//  _vertexShader?.let {
+//    glDeleteShader(it)
+//  }
+//  _fragmentShader?.let {
+//    glDeleteShader(it)
+//  }
+//  glDeleteTextures(1, intArrayOf(OESTextureId), 0)
+//  glDeleteFramebuffers(1, mFBOIds, 0)
+//}

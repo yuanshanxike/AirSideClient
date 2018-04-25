@@ -2,24 +2,33 @@ package com.lewis.liveclient.view
 
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.lewis.liveclient.R
 import com.lewis.liveclient.callback.OnRtmpConnectListener
+import com.lewis.liveclient.filter.BeautyFilter
 import com.lewis.liveclient.jniLink.LivePusher
-import com.lewis.liveclient.util.camera
-import com.lewis.liveclient.util.deleteOpenGLES
+import com.lewis.liveclient.util.*
+import com.lewis.liveclient.widget.CameraView
+import com.lewis.liveclient.widget.PopWindowDialog
 import kotlinx.android.synthetic.main.activity_live.*
+import kotlinx.android.synthetic.main.dialog_optiions.*
 
 /**
  * Create by lewis 17-11-26
  */
+var isClickSwitch = false
 class LiveActivity : BaseActivity(), OnRtmpConnectListener {
+
+  private var cameraView: CameraView? = null
+
+  private val popWindow by lazy {
+    PopWindowDialog(this)
+  }
 
   init {
     LivePusher.listener = this
+    isClickSwitch = false
   }
 
   override fun rtmpConnect(msg: String, code: Int) {
@@ -28,6 +37,8 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 
   override fun init() {
     setContentView(R.layout.activity_live)
+    cameraView = CameraView(this)
+    root_view.addView(cameraView, 0)
 //    supportActionBar?.setDisplayHomeAsUpEnabled(true)
     supportActionBar?.hide()
 
@@ -35,20 +46,40 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 
     // Set up the user interaction to manually show or hide the system UI.
 //    fullscreen_content.setOnClickListener { toggle() }
-    cameraView.setOnClickListener { toggle() }
+    cameraView?.setOnClickListener { toggle() }
 
     // Upon interacting with UI controls, delay any scheduled hide()
     // operations to prevent the jarring behavior of controls going away
     // while interacting with the UI.
-    dummy_button.setOnTouchListener(mDelayHideTouchListener)
+//    dummy_button.setOnTouchListener(mDelayHideTouchListener)
+    dummy_button.setOnClickListener {
+      hide()
+      popWindow.show()
+    }
+
+    popWindow.setContentView(R.layout.dialog_optiions)
+    popWindow.blackWhiteFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+      shaderProgramIndex = if (isChecked) 1 else 0
+      isClickSwitch = false
+    }
+    popWindow.beautyFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+      camera.stopPreview()
+      filter = if (isChecked)
+        BeautyFilter(3f)
+      else
+        null
+      root_view.removeViewInLayout(cameraView)
+      cameraView = CameraView(this)
+      root_view.addView(cameraView, 0)
+      root_view.invalidate()
+      cameraView?.setOnClickListener { toggle() }
+    }
 
     back.setOnClickListener { finish() }
   }
 
   override fun onDestroy() {
-    deleteOpenGLES()
     camera.stopPreview()
-    cameraView.onActivityDestroy()
     LivePusher.listener = null
     super.onDestroy()
   }
@@ -79,7 +110,7 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 //        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
 //        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
 //        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    cameraView.systemUiVisibility =
+    cameraView?.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LOW_PROFILE or
         View.SYSTEM_UI_FLAG_FULLSCREEN or
         View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -141,7 +172,7 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 //    fullscreen_content.systemUiVisibility =
 //        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
 //        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    cameraView.systemUiVisibility =
+    cameraView?.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     mVisible = true

@@ -185,8 +185,10 @@ public class AVCodec(private val width: Int,private val height: Int/*, private v
   private fun videoStep(byteArray: ByteBuffer): Boolean {
     val index = videoEnc.dequeueInputBuffer(-1)
     if (index >= 0) {
-      if (hasNewData)
+      if (hasNewData) {
         yuvArray = getYUV420FrameBufferByRenderScript(nowFeedData.array(), 720, 1280)   //通过renderscript转为yuv420p
+        hasNewData = false
+      }
       val buffer = getInputBuffer(index)
       buffer.clear()
       yuvArray?.let {
@@ -208,6 +210,7 @@ public class AVCodec(private val width: Int,private val height: Int/*, private v
         outIndex = videoEnc.dequeueOutputBuffer(info, 0)
         if (info.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
           Log.i(this::class.java.simpleName, "video end")
+          videoEnc.releaseOutputBuffer(outIndex, false)
           return true
         }
       } else if (outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {

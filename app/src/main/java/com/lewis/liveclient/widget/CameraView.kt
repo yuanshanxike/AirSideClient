@@ -9,11 +9,13 @@ import android.opengl.GLSurfaceView
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
+import android.view.SurfaceHolder
 import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.jniLink.startLive
 import com.lewis.liveclient.jniLink.stopLive
 import com.lewis.liveclient.opengl.GPUImageLiveRender
 import com.lewis.liveclient.util.*
+import com.lewis.liveclient.view.isClickSwitch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -71,13 +73,22 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     }
   }
 
-  //onDestroy的回调
-  fun onActivityDestroy() {
+  override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    if (render is CameraRenderer) (render as CameraRenderer).surfaceTexture.release()
+//    deleteOpenGLES()
     when(render) {
       is GPUImageLiveRender->(render as GPUImageLiveRender).stopEncode()
       is CameraRenderer->(render as CameraRenderer).stopEncode()
     }
     stopLive()
+    super.surfaceDestroyed(holder)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    camera.stopPreview()
+    if (render is CameraRenderer) (render as CameraRenderer).surfaceTexture.release()
+//    deleteOpenGLES()
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {
@@ -86,7 +97,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     private val avCodec = AVCodec(720, 1280)
 
     private var _surfaceTexture: SurfaceTexture? = null //备用属性
-    private val surfaceTexture: SurfaceTexture get() = _surfaceTexture
+    val surfaceTexture: SurfaceTexture get() = _surfaceTexture
         ?: throw NullPointerException("_surfaceTexture is null")
     private val transformMatrix = FloatArray(16)
 
@@ -125,7 +136,12 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       //获取外部纹理的矩阵，用来确定纹理的采样位置，没有此矩阵可能导致图像翻转等问题
       surfaceTexture.getTransformMatrix(transformMatrix)
 
-      startPipeline(dataBuffer, transformMatrix)
+      if (!isClickSwitch) {
+        useProgramByIndex(shaderProgramIndex)
+        isClickSwitch = true
+      }
+
+      startPipeline(shaderProgramIndex, dataBuffer, transformMatrix)
       isOnSurfaceCreated = false
 
       buffer.position(0)
@@ -143,11 +159,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
       // 该方法在渲染开始前调用，OpenGL ES的绘制上下文被重建时也会调用。
       //当Activity暂停时，绘制上下文会丢失，当Activity恢复时，绘制上下文会重建。
-      val VERTEX_SHADER: String? = shader2StringBuffer("vertex_shader.glsl")
-      val FRAGMENT_SHADER: String? = shader2StringBuffer("fragment_shader.glsl")
-
-      if (VERTEX_SHADER != null && FRAGMENT_SHADER != null)
-        initShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER)
+      createShaderPrograms(2, vertexShaderArray, fragmentShaderArray)
 
       _surfaceTexture = SurfaceTexture(OESTextureId)
 
@@ -168,7 +180,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       //开启预览
       camera.startPreview()
 
-      //开始编码
+      //开始编码并推流
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         thread(start = true, name = "startEncode") {
           avCodec.start()

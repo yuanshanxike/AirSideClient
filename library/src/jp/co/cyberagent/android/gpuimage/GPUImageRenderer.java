@@ -147,27 +147,32 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
-        final Size previewSize = camera.getParameters().getPreviewSize();
-        if (mGLRgbBuffer == null) {
-            mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
-        }
-        if (mRunOnDraw.isEmpty()) {
-            runOnDraw(new Runnable() {
-                @Override
-                public void run() {
-                    GPUImageNativeLibrary.YUVtoRBGA(data, previewSize.width, previewSize.height,
+        try {
+            final Size previewSize = camera.getParameters().getPreviewSize();
+            if (mGLRgbBuffer == null) {
+                mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
+            }
+            if (mRunOnDraw.isEmpty()) {
+                runOnDraw(new Runnable() {
+                    @Override
+                    public void run() {
+                        GPUImageNativeLibrary.YUVtoRBGA(data, previewSize.width, previewSize.height,
                             mGLRgbBuffer.array());
-                    mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
-                    camera.addCallbackBuffer(data);
+                        mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
+                        camera.addCallbackBuffer(data);
 
-                    if (mImageWidth != previewSize.width) {
-                        mImageWidth = previewSize.width;
-                        mImageHeight = previewSize.height;
-                        adjustImageScaling();
+                        if (mImageWidth != previewSize.width) {
+                            mImageWidth = previewSize.width;
+                            mImageHeight = previewSize.height;
+                            adjustImageScaling();
+                        }
                     }
-                }
-            });
+                });
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
         }
+
     }
 
     public void setUpSurfaceTexture(final Camera camera) {

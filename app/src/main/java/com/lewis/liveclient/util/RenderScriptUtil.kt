@@ -37,8 +37,8 @@ fun getYUV420FrameBufferByRenderScript(array: ByteArray, width: Int, height: Int
   script._gYUV420_frame = Allocation.createSized(rs, Element.U8(rs), height*width*3/2)
   script._height = height
   script._width = width
-  script._uStart = height * width
-  script._vStart = height * width * 5 / 4
+  script._vStart = height * width
+  script._uStart = height * width * 5 / 4
   script.forEach_rgba2yuv420(rgbaAllocation)
 
   script._gYUV420_frame.byteBuffer.position(0)

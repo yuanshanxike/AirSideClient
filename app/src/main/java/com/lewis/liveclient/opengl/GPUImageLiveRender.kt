@@ -8,6 +8,7 @@ import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.jniLink.startLive
 import com.lewis.liveclient.util.SupportSize
 import com.lewis.liveclient.util.cameraInfo
+import com.lewis.liveclient.util.initRenderScript
 import com.lewis.liveclient.util.rtmpUrl
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter
 import jp.co.cyberagent.android.gpuimage.GPUImageRenderer
@@ -31,6 +32,10 @@ class GPUImageLiveRender(filter: GPUImageFilter) : GPUImageRenderer(filter) {
 
   override fun onSurfaceCreated(unused: GL10?, config: EGLConfig?) {
     super.onSurfaceCreated(unused, config)
+
+    //初始化RenderScript的必要上下文参数
+    initRenderScript()
+
     //开始编码
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       thread(start = true, name = "startEncode") {

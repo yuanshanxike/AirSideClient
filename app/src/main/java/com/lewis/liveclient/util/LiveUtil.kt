@@ -22,6 +22,37 @@ val rtmpUrl: String by lazy {
 //通过这个字段添加GPUImage滤镜
 var filter: GPUImageFilter? = /*BeautyFilter(5f)*/null
 
+//自定义滤镜的shader
+//var isShaderChanged = false
+//var VERTEX_SHADER: String? = shader2StringBuffer("vertex_shader.glsl")
+//set(value) {
+//  value?.let {
+//    if (it != field) isShaderChanged = true
+//    field = it
+//  }
+//}
+//var FRAGMENT_SHADER: String? = shader2StringBuffer("fragment_shader.glsl")
+//set(value) {
+//  value?.let {
+//    if (it != field) isShaderChanged = true
+//    field = it
+//  }
+//}
+var shaderProgramIndex = 0  //using shader's index
+var nShader = 2             //number of shader
+val vertexShaderArray = Array<String>(nShader) {
+  when(it) {
+    0->shader2StringBuffer("vertex_shader.glsl")!!
+    else->shader2StringBuffer("blackWhite_vertex_shader.glsl")!!
+  }
+}
+val fragmentShaderArray: Array<String> = Array<String>(nShader) {
+  when(it) {
+    0->shader2StringBuffer("fragment_shader.glsl")!!
+    else->shader2StringBuffer("blackWhite_fragment_shader.glsl")!!
+  }
+}
+
 //帧宽高的枚举
 enum class SupportSize {
   VERTICAL_SD {  //纵向标清 3：4
