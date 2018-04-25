@@ -6,7 +6,10 @@ import android.view.View
 import android.widget.Toast
 import com.lewis.liveclient.R
 import com.lewis.liveclient.callback.OnRtmpConnectListener
+import com.lewis.liveclient.filter.BaseFilter
 import com.lewis.liveclient.filter.BeautyFilter
+import com.lewis.liveclient.filter.BilateralFilter
+import com.lewis.liveclient.filter.BlackWhiteShader
 import com.lewis.liveclient.jniLink.LivePusher
 import com.lewis.liveclient.util.*
 import com.lewis.liveclient.widget.CameraView
@@ -17,7 +20,6 @@ import kotlinx.android.synthetic.main.dialog_optiions.*
 /**
  * Create by lewis 17-11-26
  */
-var isClickSwitch = false
 class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 
   private var cameraView: CameraView? = null
@@ -28,7 +30,6 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 
   init {
     LivePusher.listener = this
-    isClickSwitch = false
   }
 
   override fun rtmpConnect(msg: String, code: Int) {
@@ -59,20 +60,10 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
 
     popWindow.setContentView(R.layout.dialog_optiions)
     popWindow.blackWhiteFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-      shaderProgramIndex = if (isChecked) 1 else 0
-      isClickSwitch = false
+      filter = if (isChecked) BlackWhiteShader() else BaseFilter()
     }
     popWindow.beautyFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-      camera.stopPreview()
-      filter = if (isChecked)
-        BeautyFilter(3f)
-      else
-        null
-      root_view.removeViewInLayout(cameraView)
-      cameraView = CameraView(this)
-      root_view.addView(cameraView, 0)
-      root_view.invalidate()
-      cameraView?.setOnClickListener { toggle() }
+      filter = if (isChecked) BilateralFilter() else BaseFilter()
     }
 
     back.setOnClickListener { finish() }

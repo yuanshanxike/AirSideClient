@@ -43,7 +43,7 @@ val shader2StringBuffer = {shader: String ->
   stringBuilder.toString()
 }
 
-fun shader2StringBuffer(shader: String): String? {
+fun shader2StringBuffer(shader: String): String {
   val inputStream = androidApp.resources.assets.open("shader/$shader")
   val stringBuilder = StringBuilder()
   var line: String?
@@ -59,13 +59,13 @@ fun shader2StringBuffer(shader: String): String? {
     }
   } catch (e: IOException) {
     e.printStackTrace()
-    return null             //产生IO异常(java中的受检测异常), 则返回null
+    throw NullPointerException(e.toString())
   } finally {
     try {
       inputStream.close()
     } catch (e: IOException) {
       e.printStackTrace()
-      return null           //产生IO异常(java中的受检测异常), 则返回null
+      throw NullPointerException(e.toString())
     }
   }
   return stringBuilder.toString()
@@ -200,12 +200,12 @@ val OESTextureId by lazy {
 //  glBindFramebuffer(GL_FRAMEBUFFER, 0)
 //}
 
-/****************************more than one gl program***************************************/
+fun createAndLinkProgram(vsSource: String, fsSource: String): Int {
+  val vsId = loadShader(GL_VERTEX_SHADER, vsSource)
+  val fsId = loadShader(GL_FRAGMENT_SHADER, fsSource)
 
-private var _shaderPrograms: IntArray? = null
-
-private fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
   val program = glCreateProgram()
+  val link = IntArray(1)
 
   if (program == 0) {
     throw RuntimeException("Create Program Failed! \n ${glGetError()}")
@@ -215,41 +215,74 @@ private fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
   glAttachShader(program, fsId)
   glLinkProgram(program)
 
+  glGetProgramiv(program, GL_LINK_STATUS, link, 0)
+  if (link[0] <= 0) {
+    throw RuntimeException("Linking Failed")
+  }
+  glDeleteShader(vsId)
+  glDeleteShader(fsId)
+
   return program
 }
 
-fun createShaderPrograms(n: Int, vsSourceArray: Array<String>, fsSourceArray: Array<String>)
-    : IntArray {
-  val shaderPrograms = IntArray(n)
-  for (i in 0 until n) {
-    val vertexShader = loadShader(GL_VERTEX_SHADER, vsSourceArray[i])
-    val fragmentShader = loadShader(GL_FRAGMENT_SHADER, fsSourceArray[i])
-    shaderPrograms[i] = createAndLinkProgram(vertexShader, fragmentShader)
+/****************************more than one gl program***************************************/
+
+private var _shaderPrograms: IntArray? = null
+
+fun createAndLinkProgram(vsId: Int, fsId: Int): Int {
+  val program = glCreateProgram()
+  val link = IntArray(1)
+
+  if (program == 0) {
+    throw RuntimeException("Create Program Failed! \n ${glGetError()}")
   }
-  _shaderPrograms = shaderPrograms
-  return shaderPrograms
+
+  glAttachShader(program, vsId)
+  glAttachShader(program, fsId)
+  glLinkProgram(program)
+
+  glGetProgramiv(program, GL_LINK_STATUS, link, 0)
+  if (link[0] <= 0) {
+    throw RuntimeException("Linking Failed")
+  }
+  glDeleteShader(vsId)
+  glDeleteShader(fsId)
+
+  return program
 }
 
-fun useProgramByIndex(programIndex: Int) {
-  _shaderPrograms?.let {
-    if (programIndex < nShader)
-      glUseProgram(it[programIndex])
-  } ?: throw NullPointerException("_shaderPrograms is null")
-}
-
-fun startPipeline(index: Int, vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
-  val aPositionLocation = _shaderPrograms?.let {
-    glGetAttribLocation(it[index], "aPosition")
-  } ?: throw NullPointerException("aPositionLocation is null")
-  val aTextureCoordLocation = _shaderPrograms?.let {
-    glGetAttribLocation(it[index], "aTextureCoordinate")
-  } ?: throw NullPointerException("aTextureCoordLocation is null")
-  val uTextureMatrixLocation = _shaderPrograms?.let {
-    glGetUniformLocation(it[index], "uTextureMatrix")
-  } ?: throw NullPointerException("uTextureMatrixLocation is null")
-  val uTextureSamplerLocation = _shaderPrograms?.let {
-    glGetUniformLocation(it[index], "uTextureSampler")
-  } ?: throw NullPointerException("uTextureSamplerLocation is null")
+//fun createShaderPrograms(n: Int, vsSourceArray: Array<String>, fsSourceArray: Array<String>)
+//    : IntArray {
+//  val shaderPrograms = IntArray(n)
+//  for (i in 0 until n) {
+//    val vertexShader = loadShader(GL_VERTEX_SHADER, vsSourceArray[i])
+//    val fragmentShader = loadShader(GL_FRAGMENT_SHADER, fsSourceArray[i])
+//    shaderPrograms[i] = createAndLinkProgram(vertexShader, fragmentShader)
+//  }
+//  _shaderPrograms = shaderPrograms
+//  return shaderPrograms
+//}
+//
+//fun useProgramByIndex(programIndex: Int) {
+//  _shaderPrograms?.let {
+//    if (programIndex < nShader)
+//      glUseProgram(it[programIndex])
+//  } ?: throw NullPointerException("_shaderPrograms is null")
+//}
+//
+//fun startPipeline(index: Int, vfBuffer: FloatBuffer, transformMatrix: FloatArray) {
+//  val aPositionLocation = _shaderPrograms?.let {
+//    glGetAttribLocation(it[index], "aPosition")
+//  } ?: throw NullPointerException("aPositionLocation is null")
+//  val aTextureCoordLocation = _shaderPrograms?.let {
+//    glGetAttribLocation(it[index], "aTextureCoordinate")
+//  } ?: throw NullPointerException("aTextureCoordLocation is null")
+//  val uTextureMatrixLocation = _shaderPrograms?.let {
+//    glGetUniformLocation(it[index], "uTextureMatrix")
+//  } ?: throw NullPointerException("uTextureMatrixLocation is null")
+//  val uTextureSamplerLocation = _shaderPrograms?.let {
+//    glGetUniformLocation(it[index], "uTextureSampler")
+//  } ?: throw NullPointerException("uTextureSamplerLocation is null")
 
 //  /*三种方式都是可行的，任选其一就可以*/
 //  //激活纹理单元0（方式一）
@@ -263,24 +296,24 @@ fun startPipeline(index: Int, vfBuffer: FloatBuffer, transformMatrix: FloatArray
 //  //使用默认绑定。因为shader中只有一个采样器（0号framebuffer上的纹理），所以可直接设置采样器Uniform为0(或GL_TEXTURE0) 或 直接不写(默认值就是0)（方法三）
 //  glUniform1i(uTextureSamplerLocation, 0)    //亲测，只要赋的值是0或>=8的数都可以正常进行采样
 
-  //将纹理矩阵传给片段着色器
-  glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0)
-
-  //将顶点和纹理坐标传给顶点着色器
-  vfBuffer.position(0)
-  glEnableVertexAttribArray(aPositionLocation)
-  //顶点坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
-  glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, vfBuffer)
-
-  //纹理坐标从位置2开始读取
-  vfBuffer.position(2)
-  glEnableVertexAttribArray(aTextureCoordLocation)
-  //纹理坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
-  glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, vfBuffer)
-
-  //绘制两个三角形（6个顶点）
-  glDrawArrays(GL_TRIANGLES, 0, 6)
-}
+//  //将纹理矩阵传给片段着色器
+//  glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0)
+//
+//  //将顶点和纹理坐标传给顶点着色器
+//  vfBuffer.position(0)
+//  glEnableVertexAttribArray(aPositionLocation)
+//  //顶点坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
+//  glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, vfBuffer)
+//
+//  //纹理坐标从位置2开始读取
+//  vfBuffer.position(2)
+//  glEnableVertexAttribArray(aTextureCoordLocation)
+//  //纹理坐标每次读取两个顶点值，之后间隔16（每行4个值 * 4个字节）的字节继续读取两个顶点值
+//  glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, vfBuffer)
+//
+//  //绘制两个三角形（6个顶点）
+//  glDrawArrays(GL_TRIANGLES, 0, 6)
+//}
 
 
 //clear gl

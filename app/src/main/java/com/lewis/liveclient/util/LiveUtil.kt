@@ -1,7 +1,10 @@
 package com.lewis.liveclient.util
 
+import com.lewis.liveclient.filter.BaseFilter
 import com.lewis.liveclient.filter.BeautyFilter
+import com.lewis.liveclient.filter.BilateralFilter
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter
+import java.util.*
 
 /**
  * Created by lewis on 18-4-11.
@@ -20,7 +23,7 @@ val rtmpUrl: String by lazy {
 }
 
 //通过这个字段添加GPUImage滤镜
-var filter: GPUImageFilter? = /*BeautyFilter(5f)*/null
+//var filter: GPUImageFilter? = /*BeautyFilter(5f)*/null
 
 //自定义滤镜的shader
 //var isShaderChanged = false
@@ -38,18 +41,44 @@ var filter: GPUImageFilter? = /*BeautyFilter(5f)*/null
 //    field = it
 //  }
 //}
-var shaderProgramIndex = 0  //using shader's index
-var nShader = 2             //number of shader
-val vertexShaderArray = Array<String>(nShader) {
-  when(it) {
-    0->shader2StringBuffer("vertex_shader.glsl")!!
-    else->shader2StringBuffer("blackWhite_vertex_shader.glsl")!!
+//var shaderProgramIndex = 0  //using shader's index
+//var nShader = 2             //number of shader
+//val vertexShaderArray = Array<String>(nShader) {
+//  when(it) {
+//    0->shader2StringBuffer("vertex_shader.glsl")!!
+//    else->shader2StringBuffer("blackWhite_vertex_shader.glsl")!!
+//  }
+//}
+//val fragmentShaderArray: Array<String> = Array<String>(nShader) {
+//  when(it) {
+//    0->shader2StringBuffer("fragment_shader.glsl")!!
+//    else->shader2StringBuffer("blackWhite_fragment_shader.glsl")!!
+//  }
+//}
+
+//滤镜
+var filter: BaseFilter = BaseFilter()
+set(value) {
+  runOnGLThread {
+    if (field != value)
+      field.destroy()
+    field = value
+    field.init()
   }
 }
-val fragmentShaderArray: Array<String> = Array<String>(nShader) {
-  when(it) {
-    0->shader2StringBuffer("fragment_shader.glsl")!!
-    else->shader2StringBuffer("blackWhite_fragment_shader.glsl")!!
+
+//在GLThread中执行的任务队列
+private val glThreadRunQueue: Queue<Runnable> = LinkedList<Runnable>()
+
+fun runOnGLThread(block: ()->Unit) {
+  glThreadRunQueue.add(Runnable { block() })
+}
+
+fun runAllOnGLThread() {
+  synchronized(glThreadRunQueue) {
+    while (!glThreadRunQueue.isEmpty()) {
+      glThreadRunQueue.poll().run()
+    }
   }
 }
 

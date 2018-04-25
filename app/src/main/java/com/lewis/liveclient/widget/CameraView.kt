@@ -15,7 +15,6 @@ import com.lewis.liveclient.jniLink.startLive
 import com.lewis.liveclient.jniLink.stopLive
 import com.lewis.liveclient.opengl.GPUImageLiveRender
 import com.lewis.liveclient.util.*
-import com.lewis.liveclient.view.isClickSwitch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -35,11 +34,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   private var _camera: Camera? = null  //备用属性
   val camera: Camera get() = _camera ?: throw NullPointerException()
 
-  private val render by lazy {
-    filter?.let {
-      GPUImageLiveRender(it)
-    } ?: CameraRenderer()
-  }
+  private val render = CameraRenderer()
 
   init {
     debugFlags = DEBUG_CHECK_GL_ERROR or DEBUG_LOG_GL_CALLS
@@ -57,29 +52,13 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 //    }
 
     setEGLContextClientVersion(2)
-    when(render) {
-      is GPUImageLiveRender->{
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0)
-        holder.setFormat(PixelFormat.RGBA_8888)
-        (render as GPUImageLiveRender).setUpSurfaceTexture(camera)
-        (render as GPUImageLiveRender).autoAdaptCameraView()
-        setRenderer(render)
-        renderMode = RENDERMODE_CONTINUOUSLY
-      }
-      is CameraRenderer->{
-        setRenderer(render)
-        renderMode = RENDERMODE_WHEN_DIRTY
-      }
-    }
+    setRenderer(render)
+    renderMode = RENDERMODE_WHEN_DIRTY
   }
 
   override fun surfaceDestroyed(holder: SurfaceHolder?) {
-    if (render is CameraRenderer) (render as CameraRenderer).surfaceTexture.release()
-//    deleteOpenGLES()
-    when(render) {
-      is GPUImageLiveRender->(render as GPUImageLiveRender).stopEncode()
-      is CameraRenderer->(render as CameraRenderer).stopEncode()
-    }
+    render.surfaceTexture.release()
+    render.stopEncode()
     stopLive()
     super.surfaceDestroyed(holder)
   }
@@ -87,8 +66,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   override fun onPause() {
     super.onPause()
     camera.stopPreview()
-    if (render is CameraRenderer) (render as CameraRenderer).surfaceTexture.release()
-//    deleteOpenGLES()
+    render.surfaceTexture.release()
   }
 
   private inner class /*companion object*/ CameraRenderer : Renderer {
@@ -136,12 +114,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
       //获取外部纹理的矩阵，用来确定纹理的采样位置，没有此矩阵可能导致图像翻转等问题
       surfaceTexture.getTransformMatrix(transformMatrix)
 
-      if (!isClickSwitch) {
-        useProgramByIndex(shaderProgramIndex)
-        isClickSwitch = true
-      }
-
-      startPipeline(shaderProgramIndex, dataBuffer, transformMatrix)
+      runAllOnGLThread()
+      filter.onDraw(OESTextureId, dataBuffer, transformMatrix)
       isOnSurfaceCreated = false
 
       buffer.position(0)
@@ -154,12 +128,13 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
       GLES20.glViewport(0, 0, width, height)
+      filter.onOutputSizeChanged(width, height)
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
       // 该方法在渲染开始前调用，OpenGL ES的绘制上下文被重建时也会调用。
       //当Activity暂停时，绘制上下文会丢失，当Activity恢复时，绘制上下文会重建。
-      createShaderPrograms(2, vertexShaderArray, fragmentShaderArray)
+      filter.init()
 
       _surfaceTexture = SurfaceTexture(OESTextureId)
 
