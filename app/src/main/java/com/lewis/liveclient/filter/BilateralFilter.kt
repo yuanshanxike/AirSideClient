@@ -8,10 +8,10 @@ import com.lewis.liveclient.util.shader2StringBuffer
  * Created by lewis on 18-4-25.
  *
  */
-class BilateralFilter(private var distanceNormalizationFactor: Float = 8.0f) : BaseFilter(
-    vertexShader = shader2StringBuffer("bilateral_vertex_shader.glsl")
-    , fragmentShader = shader2StringBuffer("bilateral_fragment_shader.glsl")
-) {
+open class BilateralFilter(private var distanceNormalizationFactor: Float = 8.0f
+    , vertexShader: String = shader2StringBuffer("bilateral_vertex_shader.glsl")
+    , fragmentShader: String = shader2StringBuffer("bilateral_fragment_shader.glsl"))
+  : BaseFilter(vertexShader = vertexShader, fragmentShader = fragmentShader) {
 
   private var disFactorLocation: Int = GL_NOT_INIT
   private var singleStepOffsetLocation: Int = GL_NOT_INIT

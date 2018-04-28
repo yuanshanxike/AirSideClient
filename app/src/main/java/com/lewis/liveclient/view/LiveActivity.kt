@@ -8,7 +8,6 @@ import com.lewis.liveclient.R
 import com.lewis.liveclient.callback.OnRtmpConnectListener
 import com.lewis.liveclient.filter.BaseFilter
 import com.lewis.liveclient.filter.BeautyFilter
-import com.lewis.liveclient.filter.BilateralFilter
 import com.lewis.liveclient.filter.BlackWhiteShader
 import com.lewis.liveclient.jniLink.LivePusher
 import com.lewis.liveclient.util.*
@@ -63,7 +62,7 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
       filter = if (isChecked) BlackWhiteShader() else BaseFilter()
     }
     popWindow.beautyFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-      filter = if (isChecked) BilateralFilter() else BaseFilter()
+      filter = if (isChecked) BeautyFilter(1.8f) else BaseFilter()
     }
 
     back.setOnClickListener { finish() }
