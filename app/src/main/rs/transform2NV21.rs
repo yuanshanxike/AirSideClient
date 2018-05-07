@@ -32,7 +32,7 @@ void RS_KERNEL rgba2nv21(uchar4 in, uint32_t x, uint32_t y) {
   uchar u = _u < 0 ? 0 : (_u > 255 ? 255 : _u);                 //maybe overfloor
   uchar v = _v < 0 ? 0 : (_v > 255 ? 255 : _v);                 //maybe overfloor
 
-  uchar3 yuv = (uchar3){lum, u, v};
+  uchar3 yuv = (uchar3){lum, v, u};
   rsSetElementAt_uchar(gNV21_frame, yuv.s0, x+((height-1 - y)*width));      //Y  *通过修改(y)为(height-1 - y)來实现上下翻转
   if(x%2 == 1 && y%2 == 1) {
     int index = uvStart + ((height-1 - y)/2)*width + (x & (~1));  //*通过修改(y)为(height-1 - y)來实现上下翻转

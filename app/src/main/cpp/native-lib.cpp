@@ -99,7 +99,7 @@ JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_send_1sps_1p
   live->add_264_header((uchar*)sps, sps_length, (uchar*)pps, pps_length);
 
   env->ReleaseByteArrayElements(sps_, sps, 0);
-  env->ReleaseByteArrayElements(sps_, sps, 0);
+  env->ReleaseByteArrayElements(pps_, pps, 0);
 }
 
 JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_send_1video_1body(
@@ -115,6 +115,33 @@ JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_send_1video_
   live->add_264_body((uchar*)body, body_length);
 
   env->ReleaseByteArrayElements(body_, body, 0);
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_sendAACSpec(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray aac_spec_,
+    jint spec_length
+) {
+  if (!live)
+    return;
+  jbyte* aac_spec = env->GetByteArrayElements(aac_spec_, 0);
+  live->sendAACSpec((uchar*)aac_spec, spec_length);
+  env->ReleaseByteArrayElements(aac_spec_, aac_spec, 0);
+}
+
+JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_sendAACData(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray data_,
+    jint data_length,
+    jlong time_stamp
+) {
+  if (!live)
+    return;
+  jbyte* data = env->GetByteArrayElements(data_, 0);
+  live->sendAACData((uchar *)data, data_length, (long)time_stamp);
+  env->ReleaseByteArrayElements(data_, data, 0);
 }
 
 JNIEXPORT void JNICALL Java_com_lewis_liveclient_jniLink_LivePusher_stopRTMP(

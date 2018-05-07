@@ -9,6 +9,7 @@ import android.opengl.GLSurfaceView
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
+import android.util.Log
 import android.view.SurfaceHolder
 import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.jniLink.startLive
@@ -36,6 +37,8 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 
   private val render = CameraRenderer()
 
+  private var textureIsAvailable = false
+
   init {
     debugFlags = DEBUG_CHECK_GL_ERROR or DEBUG_LOG_GL_CALLS
 
@@ -57,15 +60,17 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
   }
 
   override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    textureIsAvailable = false
+    camera.stopPreview()
+    camera.release()
     render.surfaceTexture.release()
     render.stopEncode()
-    stopLive()
     super.surfaceDestroyed(holder)
   }
 
   override fun onPause() {
     super.onPause()
-    camera.stopPreview()
+    render.stopEncode()
     render.surfaceTexture.release()
   }
 
@@ -109,6 +114,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     override fun onDrawFrame(gl: GL10?) {
       GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)  //white
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+
+      if (!textureIsAvailable) return
+
       //更新纹理图像
       surfaceTexture.updateTexImage()
       //获取外部纹理的矩阵，用来确定纹理的采样位置，没有此矩阵可能导致图像翻转等问题
@@ -147,8 +155,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
         this@CameraView.requestRender()
       }
 
-      //初始化RenderScript的必要上下文参数
-      initRenderScript()
+      textureIsAvailable = true
 
       //将此SurfaceTexture作为相机预览输出
       camera.setPreviewTexture(surfaceTexture)
@@ -167,6 +174,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
 
     fun stopEncode() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        stopLive()
         avCodec.stop()
       }
     }

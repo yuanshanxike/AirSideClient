@@ -69,7 +69,6 @@ class LiveActivity : BaseActivity(), OnRtmpConnectListener {
   }
 
   override fun onDestroy() {
-    camera.stopPreview()
     LivePusher.listener = null
     super.onDestroy()
   }

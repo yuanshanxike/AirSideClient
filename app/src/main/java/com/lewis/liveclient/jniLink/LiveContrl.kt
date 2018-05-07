@@ -3,6 +3,7 @@ package com.lewis.liveclient.jniLink
 import android.media.MediaCodec
 import android.os.Build
 import android.support.annotation.RequiresApi
+import android.util.Log
 import java.nio.ByteBuffer
 import kotlin.experimental.and
 
@@ -50,6 +51,25 @@ fun packAVCFrame(bb: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
   }
 }
 
+@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+fun packAACFrame(bb: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+  if (bufferInfo.size == 2) {
+    //查看码流可知，这里应该已经是把关键帧计算好了，所以只需直接发送
+    val bytes = ByteArray(2)
+    bb.get(bytes)
+    bytes.forEach {
+      Log.i("AAC1", "$it")
+    }
+    LivePusher.sendAACSpec(bytes, 2)
+  } else {
+    val bytes = ByteArray(bufferInfo.size)
+    bb.get(bytes)
+    bytes.forEach {
+      Log.i("AAC2", "$it")
+    }
+    LivePusher.sendAACData(bytes, bytes.size, bufferInfo.presentationTimeUs / 1000)
+  }
+}
 
 fun startLive(url: String, width: Int, height: Int, rate: Int) {
   LivePusher.initLive(url, width, height, rate)

@@ -149,6 +149,52 @@ void Live::add_264_body(uchar *buf, int len) {
   addPacket(packet, true);
 }
 
+void Live::sendAACSpec(uchar* data, int len) {
+  RTMPPacket* packet = (RTMPPacket *)malloc(sizeof(RTMPPacket));
+  RTMPPacket_Reset(packet);
+  if (!RTMPPacket_Alloc(packet, (uint32_t) (len+2))) {
+    free(packet);
+    return;
+  }
+  char *body = packet->m_body;
+  body[0] = (char) 0xAF;
+  body[1] = 0x00;
+  memcpy(&body[2], data, (size_t) len);
+
+  packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+  packet->m_nBodySize = (uint32_t) (len + 2);
+  packet->m_nChannel = 0x04;
+  packet->m_nTimeStamp = 0;
+  packet->m_hasAbsTimestamp = 0;
+  packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+
+  addPacket(packet, false);
+}
+
+void Live::sendAACData(uchar* data, int len, long time_stamp) {
+  if (len > 0) {
+    RTMPPacket* packet = (RTMPPacket *)malloc(sizeof(RTMPPacket));
+    RTMPPacket_Reset(packet);
+    if (!RTMPPacket_Alloc(packet, (uint32_t) (len+2))) {
+      free(packet);
+      return;
+    }
+    char* body = packet->m_body;
+    body[0] = (char) 0xAF;
+    body[1] = 0x01;
+    memcpy(&body[2], data, (size_t) len);
+
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nBodySize = (uint32_t) (len + 2);
+    packet->m_nChannel = 0x04;
+    packet->m_nTimeStamp = (uint32_t) time_stamp;
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+
+    addPacket(packet, false);
+  }
+}
+
 /**
  * 音视频数据加入推流队列
  * @param packet

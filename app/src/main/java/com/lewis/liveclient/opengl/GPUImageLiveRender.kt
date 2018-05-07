@@ -34,7 +34,7 @@ class GPUImageLiveRender(filter: GPUImageFilter) : GPUImageRenderer(filter) {
     super.onSurfaceCreated(unused, config)
 
     //初始化RenderScript的必要上下文参数
-    initRenderScript()
+    initRenderScript(false)
 
     //开始编码
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
