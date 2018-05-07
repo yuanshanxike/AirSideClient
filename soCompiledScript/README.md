@@ -11,7 +11,7 @@
 
 ```shell
 # GCC 找到头文件的路径(ndk arm)
-INCLUDE=/home/lewis/android-ndk-r10e/platforms/android-21/arch-arm/usr/include
+INCLUDE=/home/lewis/android-ndk-r10e/platforms/android-15/arch-arm/usr/include
 C_INCLUDE_PATH=$INCLUDE
 export C_INCLUDE_PATH
 ```
@@ -19,7 +19,7 @@ export C_INCLUDE_PATH
 ```shell
 # ndk environment variables
 export NDK=/home/lewis/android-ndk-r10e
-export SYSROOT=$NDK/platforms/android-21/arch-arm/  #arm
+export SYSROOT=$NDK/platforms/android-15/arch-arm/  #arm
 export TOOLCHAIN=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64
 ```
 

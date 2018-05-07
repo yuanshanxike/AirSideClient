@@ -7,6 +7,7 @@ import java.lang.reflect.Type
 
 /**
  * Created by lewis on 18-2-24.
+ * 屏幕尺寸(单位转换)工具
  */
 
 //var activity: Activity? = null

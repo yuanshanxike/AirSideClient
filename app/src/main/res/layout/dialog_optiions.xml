@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@color/black_overlay">
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="-滤镜-"/>
+      <Switch
+        android:id="@+id/blackWhiteFilter_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="黑白滤镜："/>
+      <Switch
+        android:id="@+id/beautyFilter_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="美颜滤镜："/>
+
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"/>
+    </LinearLayout>
+  </ScrollView>
+
+</android.support.constraint.ConstraintLayout>

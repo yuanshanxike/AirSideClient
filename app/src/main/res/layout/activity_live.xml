@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0099cc"
-    tools:context="com.lewis.liveclient.view.LiveActivity">
+    tools:context="com.lewis.liveclient.view.LiveActivity"
+    android:id="@+id/root_view">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -19,11 +20,11 @@
         android:textSize="50sp"
         android:textStyle="bold" />-->
 
-    <com.lewis.liveclient.opengl.CameraView
+    <!--<com.lewis.liveclient.widget.CameraView
       android:id="@+id/cameraView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:keepScreenOn="true"/>
+      android:keepScreenOn="true"/>-->
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -31,6 +32,39 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
+
+        <LinearLayout
+          android:id="@+id/topBar"
+          style="?metaButtonBarStyle"
+          android:background="@color/black_overlay"
+          android:layout_width="match_parent"
+          android:layout_height="60dp"
+          android:layout_gravity="top|center_horizontal"
+          android:orientation="horizontal"
+          android:gravity="center_vertical">
+
+          <Button
+            android:id="@+id/back"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            style="?metaButtonBarButtonStyle"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/back"/>
+
+          <Button
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?metaButtonBarButtonStyle"
+            android:layout_marginLeft="35dp"
+            android:layout_marginStart="35dp"
+            android:layout_gravity="center"
+            android:text="Tech by lewis"
+            android:textSize="18sp"
+            android:textStyle="italic"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"

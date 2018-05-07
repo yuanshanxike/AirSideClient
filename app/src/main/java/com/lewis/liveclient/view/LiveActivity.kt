@@ -2,46 +2,87 @@ package com.lewis.liveclient.view
 
 import android.os.Bundle
 import android.os.Handler
-import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.lewis.liveclient.R
-import com.lewis.liveclient.util.camera
-import com.lewis.liveclient.util.deleteOpenGLES
+import com.lewis.liveclient.callback.OnRtmpConnectListener
+import com.lewis.liveclient.filter.BaseFilter
+import com.lewis.liveclient.filter.BeautyFilter
+import com.lewis.liveclient.filter.BlackWhiteShader
+import com.lewis.liveclient.jniLink.LivePusher
+import com.lewis.liveclient.util.*
+import com.lewis.liveclient.widget.CameraView
+import com.lewis.liveclient.widget.PopWindowDialog
 import kotlinx.android.synthetic.main.activity_live.*
+import kotlinx.android.synthetic.main.dialog_optiions.*
 
 /**
  * Create by lewis 17-11-26
  */
-class LiveActivity : BaseActivity() {
+class LiveActivity : BaseActivity(), OnRtmpConnectListener {
+
+  private var cameraView: CameraView? = null
+
+  private val popWindow by lazy {
+    PopWindowDialog(this)
+  }
+
+  init {
+    LivePusher.listener = this
+  }
+
+  override fun rtmpConnect(msg: String, code: Int) {
+    Toast.makeText(this, msg + " code: $code", Toast.LENGTH_SHORT).show()
+  }
 
   override fun init() {
     setContentView(R.layout.activity_live)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    cameraView = CameraView(this)
+    root_view.addView(cameraView, 0)
+//    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    supportActionBar?.hide()
 
     mVisible = true
 
     // Set up the user interaction to manually show or hide the system UI.
 //    fullscreen_content.setOnClickListener { toggle() }
-    cameraView.setOnClickListener { toggle() }
+    cameraView?.setOnClickListener { toggle() }
 
     // Upon interacting with UI controls, delay any scheduled hide()
     // operations to prevent the jarring behavior of controls going away
     // while interacting with the UI.
-    dummy_button.setOnTouchListener(mDelayHideTouchListener)
+//    dummy_button.setOnTouchListener(mDelayHideTouchListener)
+    dummy_button.setOnClickListener {
+      hide()
+      popWindow.show()
+    }
+
+    popWindow.setContentView(R.layout.dialog_optiions)
+    popWindow.blackWhiteFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+      filter = if (isChecked) BlackWhiteShader() else BaseFilter()
+    }
+    popWindow.beautyFilter_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+      filter = if (isChecked) BeautyFilter(1.8f) else BaseFilter()
+    }
+
+    back.setOnClickListener { finish() }
   }
 
   override fun onDestroy() {
-    deleteOpenGLES()
-    camera.stopPreview()
+    LivePusher.listener = null
     super.onDestroy()
   }
 
-  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-    when (item?.itemId) {
-      android.R.id.home ->
-          finish()
-    }
-    return super.onOptionsItemSelected(item)
+//  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+//    when (item?.itemId) {
+//      android.R.id.home ->
+//          finish()
+//    }
+//    return super.onOptionsItemSelected(item)
+//  }
+
+  override fun onBackPressed() {
+    finish()
   }
 
   private val mHideHandler = Handler()
@@ -58,7 +99,7 @@ class LiveActivity : BaseActivity() {
 //        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
 //        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
 //        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    cameraView.systemUiVisibility =
+    cameraView?.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LOW_PROFILE or
         View.SYSTEM_UI_FLAG_FULLSCREEN or
         View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -68,7 +109,8 @@ class LiveActivity : BaseActivity() {
   }
   private val mShowPart2Runnable = Runnable {
     // Delayed display of UI elements
-    supportActionBar?.show()
+//    supportActionBar?.show()
+    topBar.visibility = View.VISIBLE
     fullscreen_content_controls.visibility = View.VISIBLE
   }
   private var mVisible: Boolean = false
@@ -104,7 +146,8 @@ class LiveActivity : BaseActivity() {
 
   private fun hide() {
     // Hide UI first
-    supportActionBar?.hide()
+//    supportActionBar?.hide()
+    topBar.visibility = View.GONE
     fullscreen_content_controls.visibility = View.GONE
     mVisible = false
 
@@ -118,7 +161,7 @@ class LiveActivity : BaseActivity() {
 //    fullscreen_content.systemUiVisibility =
 //        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
 //        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    cameraView.systemUiVisibility =
+    cameraView?.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     mVisible = true
