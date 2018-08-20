@@ -1,7 +1,6 @@
 package com.lewis.liveclient.widget
 
 import android.content.Context
-import android.graphics.PixelFormat
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.opengl.GLES20
@@ -9,12 +8,10 @@ import android.opengl.GLSurfaceView
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
-import android.util.Log
 import android.view.SurfaceHolder
 import com.lewis.liveclient.hardcode.AVCodec
 import com.lewis.liveclient.jniLink.startLive
 import com.lewis.liveclient.jniLink.stopLive
-import com.lewis.liveclient.opengl.GPUImageLiveRender
 import com.lewis.liveclient.util.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -2,7 +2,6 @@ package com.lewis.liveclient.hardcode
 
 import android.media.*
 import android.os.Build
-import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.util.Log
 import com.lewis.liveclient.jniLink.packAACFrame
@@ -13,7 +12,6 @@ import com.lewis.liveclient.util.script
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
