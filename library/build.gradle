@@ -29,8 +29,6 @@ android {
             assets.srcDirs = ['assets']
             jni.srcDirs = ['jni']
         }
-
-        instrumentTest.setRoot('tests')
     }
 
     lintOptions {
