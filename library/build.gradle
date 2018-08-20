@@ -13,7 +13,7 @@ android {
         ndk {
 //            moduleName "gpuimage-library"
 //            stl "gnustl_shared"
-            abiFilters "armeabi", "armeabi-v7a"
+            abiFilters "armeabi-v7a"  //最新的NDK r17版本，已经去掉了armeabi、mips、mips64的ABI支持。  https://juejin.im/post/5afe28446fb9a07aa0483d0a
 //            ldLibs "log"
         }
     }

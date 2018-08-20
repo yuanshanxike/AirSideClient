@@ -19,7 +19,7 @@ android {
             }
         }
         ndk {
-            abiFilters "armeabi", "armeabi-v7a"
+            abiFilters "armeabi-v7a"  //最新的NDK r17版本，已经去掉了armeabi、mips、mips64的ABI支持。  https://juejin.im/post/5afe28446fb9a07aa0483d0a
         }
 
         //RenderScript settings
@@ -51,7 +51,7 @@ android {
             //针对不同API生成只包含其架构so的多个apk
             enable true
             reset()
-            include "armeabi", "armeabi-v7a"
+            include "armeabi-v7a"  //最新的NDK r17版本，已经去掉了armeabi、mips、mips64的ABI支持。  https://juejin.im/post/5afe28446fb9a07aa0483d0a
         }
     }
 }
