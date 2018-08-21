@@ -109,7 +109,7 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     private val buffer = ByteBuffer.allocate(720*1280*4)
 
     override fun onDrawFrame(gl: GL10?) {
-      GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)  //white
+      GLES20.glClearColor(0f, 0f, 0f, 1.0f)  //black
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
       if (!textureIsAvailable) return
@@ -132,7 +132,9 @@ class CameraView constructor(context: Context, attrs: AttributeSet? = null)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-      GLES20.glViewport(0, 0, width, height)
+      val actualHeight = (width * previewRatio).toInt()
+      val startPointY = (screenHeight - actualHeight) / 2
+      GLES20.glViewport(0, startPointY, width, actualHeight)
       filter.onOutputSizeChanged(width, height)
     }
 

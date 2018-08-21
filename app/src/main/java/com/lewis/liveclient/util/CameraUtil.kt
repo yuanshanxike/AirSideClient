@@ -32,6 +32,9 @@ fun initCamera(context: Context, isFacing: Boolean = true): Camera {
   val sizes = cp.supportedPreviewSizes
   val size = getOptimalPreviewSizeFullScreen(sizes)
 
+  //记录所选取的尺寸的 ratio
+  previewRatio = maxOf(size.height, size.width) / minOf(size.height, size.width).toDouble()
+
   cp.setPreviewSize(size.width, size.height)
   cp.previewFormat = NV21    //设置成nv21是为了配合x264进行编码
   cp.setPreviewFpsRange(videoParam.mFpsRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
@@ -68,6 +71,8 @@ fun findNeedCamera(flag: Int): Int {
 
 private const val CAMERA_RATIO_4_3 = 1.33f
 private const val CAMERA_RATIO_16_9 = 1.77f
+
+var previewRatio = CAMERA_RATIO_16_9.toDouble()
 
 fun getOptimalPreviewSizeFullScreen(sizes: List<Camera.Size>)
     : Camera.Size {

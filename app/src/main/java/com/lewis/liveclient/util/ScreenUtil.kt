@@ -49,3 +49,5 @@ inline val Float.sp: Float get() = (displayMetrics.scaledDensity * this + 0.5F)
 
 val screenHeight get() = displayMetrics.heightPixels
 val screenWidth get() = displayMetrics.widthPixels
+
+val screenRatio = maxOf(screenHeight, screenWidth) / minOf(screenHeight, screenWidth).toDouble()
